@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* ── Brand Colors ─────────────────────────────────────── */
+  --color-brand-primary: #6366f1; /* Indigo 500 — Signal  */
+  --color-brand-secondary: #8b5cf6; /* Violet 500 — Shard   */
+  --color-brand-accent: #06b6d4; /* Cyan 500   — Pulse   */
+
+  /* ── Background & Surface ────────────────────────────── */
+  --color-bg: #0a0a0f; /* Deep Space           */
+  --color-surface: #13131a; /* Card surfaces        */
+  --color-surface-2: #1c1c27; /* Elevated surfaces    */
+
+  /* ── Text ────────────────────────────────────────────── */
+  --color-text: #f1f5f9; /* Slate 100            */
+  --color-text-muted: #94a3b8; /* Slate 400            */
+
+  /* ── Semantic ────────────────────────────────────────── */
+  --color-success: #10b981; /* Emerald 500          */
+  --color-warning: #f59e0b; /* Amber 500            */
+  --color-danger: #ef4444; /* Red 500              */
+
+  /* ── Tier Colors ─────────────────────────────────────── */
+  --color-tier-newcomer: #64748b; /* Slate 500            */
+  --color-tier-explorer: #6366f1; /* Indigo 500           */
+  --color-tier-contributor: #8b5cf6; /* Violet 500           */
+  --color-tier-veteran: #06b6d4; /* Cyan 500             */
+  --color-tier-legend: #f59e0b; /* Amber 500 (gold)     */
+
+  /* ── Brand Gradient ──────────────────────────────────── */
+  --gradient-sovereign: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
+
+  /* ── Fonts ───────────────────────────────────────────── */
+  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "Courier New", monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Base ──────────────────────────────────────────────── */
+html {
+  background-color: #0a0a0f;
+  color: #f1f5f9;
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #13131a;
+}
+::-webkit-scrollbar-thumb {
+  background: #1c1c27;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6366f1;
+}
+
+/* ── Selection ─────────────────────────────────────────── */
+::selection {
+  background-color: #6366f133;
+  color: #f1f5f9;
 }
