@@ -8,9 +8,10 @@ export function FinalCTA() {
   const reducedMotion = useReducedMotion();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = email.trim();
     if (!trimmed.includes("@") || !trimmed.includes(".")) {
@@ -18,8 +19,20 @@ export function FinalCTA() {
       return;
     }
     setError(null);
-    // TODO: wire to actual waitlist endpoint (Phase 0.4)
-    setSubmitted(true);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
+      if (!res.ok) throw new Error();
+      setSubmitted(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -167,11 +180,12 @@ export function FinalCTA() {
 
                 <button
                   type="submit"
-                  className="group relative shrink-0 overflow-hidden rounded-xl px-6 py-3.5 text-sm font-bold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6366f1] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0f]"
+                  disabled={loading}
+                  className="group relative shrink-0 overflow-hidden rounded-xl px-6 py-3.5 text-sm font-bold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6366f1] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0f] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" />
                   <span className="absolute inset-0 bg-gradient-to-r from-[#6366f1] to-[#06b6d4] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  <span className="relative">Get Early Access</span>
+                  <span className="relative">{loading ? "Sending…" : "Get Early Access"}</span>
                 </button>
               </motion.form>
             )}
