@@ -5,7 +5,6 @@ export interface TierConfig {
   minScore: number;
   maxScore: number | null;
   color: string;
-  gradient: string;
   glowColor: string;
   dots: number; // filled dots out of 5
 }
@@ -15,45 +14,40 @@ export const TIERS: Record<Tier, TierConfig> = {
     label: "Newcomer",
     minScore: 0,
     maxScore: 499,
-    color: "#64748b",
-    gradient: "from-slate-600 to-slate-500",
-    glowColor: "rgba(100, 116, 139, 0.3)",
+    color: "#777777",
+    glowColor: "rgba(120, 120, 120, 0.2)",
     dots: 1,
   },
   explorer: {
     label: "Explorer",
     minScore: 500,
     maxScore: 1499,
-    color: "#6366f1",
-    gradient: "from-indigo-600 to-indigo-500",
-    glowColor: "rgba(99, 102, 241, 0.3)",
+    color: "#4d8eff",
+    glowColor: "rgba(77, 142, 255, 0.25)",
     dots: 2,
   },
   contributor: {
     label: "Contributor",
     minScore: 1500,
     maxScore: 3999,
-    color: "#8b5cf6",
-    gradient: "from-violet-600 to-indigo-500",
-    glowColor: "rgba(139, 92, 246, 0.35)",
+    color: "#a066dd",
+    glowColor: "rgba(160, 102, 221, 0.25)",
     dots: 3,
   },
   veteran: {
     label: "Veteran",
     minScore: 4000,
     maxScore: 7999,
-    color: "#06b6d4",
-    gradient: "from-cyan-500 via-violet-500 to-indigo-500",
-    glowColor: "rgba(6, 182, 212, 0.4)",
+    color: "#22b5cc",
+    glowColor: "rgba(34, 181, 204, 0.3)",
     dots: 4,
   },
   legend: {
     label: "Legend",
     minScore: 8000,
     maxScore: null,
-    color: "#f59e0b",
-    gradient: "from-amber-400 via-violet-500 to-indigo-500",
-    glowColor: "rgba(245, 158, 11, 0.5)",
+    color: "#f0aa20",
+    glowColor: "rgba(240, 170, 32, 0.35)",
     dots: 5,
   },
 };

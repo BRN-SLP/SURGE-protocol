@@ -2,44 +2,35 @@
 
 import { useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { type IdentityCardData, TIERS, getNextTierInfo } from "@/types";
+import { type IdentityCardData, TIERS } from "@/types";
 
 interface IdentityCardProps {
   data: IdentityCardData;
-  interactive?: boolean; // enable 3D tilt
+  interactive?: boolean;
   size?: "sm" | "md" | "lg";
 }
 
-const SIZE_CLASSES = {
-  sm: "w-48 h-72 text-xs",
-  md: "w-64 h-96 text-sm",
-  lg: "w-80 h-[28rem] text-base",
-};
+function shortHash(id: number): string {
+  const n = ((id * 0x7e57c0de) >>> 0).toString(16).toUpperCase().padStart(8, "0");
+  return `0x${n.slice(0, 2)}…${n.slice(-4)}`;
+}
 
-export function IdentityCard({ data, interactive = true, size = "md" }: IdentityCardProps) {
+export function IdentityCard({ data, interactive = true }: IdentityCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
 
   const tier = TIERS[data.tier];
-  const nextTier = getNextTierInfo(data.score);
-  const nextTierConfig = nextTier ? TIERS[nextTier.tier] : null;
-  const progressPct = nextTier
-    ? ((data.score - tier.minScore) / ((nextTierConfig?.minScore ?? data.score) - tier.minScore)) *
-      100
-    : 100;
-
-  const maxTilt = data.tier === "legend" ? 15 : data.tier === "veteran" ? 12 : 8;
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!interactive || !cardRef.current) return;
       const rect = cardRef.current.getBoundingClientRect();
-      const x = ((e.clientY - rect.top) / rect.height - 0.5) * -maxTilt * 2;
-      const y = ((e.clientX - rect.left) / rect.width - 0.5) * maxTilt * 2;
+      const x = ((e.clientY - rect.top) / rect.height - 0.5) * -10;
+      const y = ((e.clientX - rect.left) / rect.width - 0.5) * 10;
       setTilt({ x, y });
     },
-    [interactive, maxTilt],
+    [interactive],
   );
 
   const handleMouseLeave = useCallback(() => {
@@ -51,11 +42,17 @@ export function IdentityCard({ data, interactive = true, size = "md" }: Identity
     setIsHovered(true);
   }, []);
 
+  const metrics = [
+    { label: "Sybil Resistance", value: data.defiPct },
+    { label: "Network Trust", value: data.builderPct },
+    { label: "Activity Depth", value: data.govPct },
+  ];
+
   return (
     <motion.div
       ref={cardRef}
-      className={`relative ${SIZE_CLASSES[size]} cursor-default select-none`}
-      style={{ perspective: 1000 }}
+      className="relative cursor-default select-none"
+      style={{ width: 340, perspective: 1000 }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onMouseEnter={handleMouseEnter}
@@ -66,150 +63,226 @@ export function IdentityCard({ data, interactive = true, size = "md" }: Identity
       }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      {/* Glow effect */}
-      <div
-        className="absolute inset-0 rounded-2xl opacity-0 blur-xl transition-opacity duration-500"
-        style={{
-          background: tier.glowColor,
-          opacity: isHovered ? 0.6 : 0,
-        }}
-      />
+      {/* Spinning border wrapper */}
+      <div className="relative overflow-hidden" style={{ borderRadius: 16, padding: 1 }}>
+        {/* Spinning conic gradient border */}
+        <motion.div
+          className="pointer-events-none absolute"
+          style={{
+            inset: "-80%",
+            width: "260%",
+            height: "260%",
+            background:
+              "conic-gradient(from 0deg, transparent 0deg, transparent 260deg, #ca5454 300deg, #f5f5f5 340deg, transparent 360deg)",
+          }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+          aria-hidden="true"
+        />
 
-      {/* Card border — animated for veteran/legend */}
-      <div
-        className={`absolute inset-0 rounded-2xl p-[1px] ${
-          data.tier === "legend" || data.tier === "veteran" ? "animate-gradient-border" : ""
-        }`}
-        style={{
-          background:
-            data.tier === "newcomer"
-              ? "#2d2d3f"
-              : `linear-gradient(135deg, ${tier.color}88, ${tier.color}44, ${tier.color}88)`,
-        }}
-      >
         {/* Card body */}
-        <div className="relative flex h-full w-full flex-col gap-3 overflow-hidden rounded-2xl bg-[#13131a] p-5">
+        <div
+          className="relative"
+          style={{
+            borderRadius: 15,
+            background: "#141414",
+            padding: 28,
+            zIndex: 1,
+          }}
+        >
+          {/* Subtle radial glow */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse at 70% 20%, rgba(202,84,84,0.06) 0%, transparent 60%)",
+              borderRadius: 15,
+            }}
+            aria-hidden="true"
+          />
+
           {/* Header */}
-          <div className="flex items-start justify-between">
+          <div className="relative mb-5 flex items-start justify-between">
             <div>
-              <p className="font-mono text-xs tracking-widest text-[#94a3b8] uppercase">
-                ◆ SURGE IDENTITY
-              </p>
-              <p className="mt-0.5 font-mono text-lg font-bold text-[#f1f5f9]">
-                #{String(data.id).padStart(5, "0")}
-              </p>
-            </div>
-            {/* Tier badge */}
-            <div className="flex flex-col items-end gap-1" style={{ color: tier.color }}>
-              <span className="font-display text-sm font-bold tracking-wide uppercase">
-                {tier.label}
-              </span>
-              <TierDots filled={tier.dots} color={tier.color} />
-            </div>
-          </div>
-
-          {/* Score */}
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-baseline justify-between">
-              <span
-                className="font-display text-2xl font-bold tabular-nums"
-                style={{ color: tier.color }}
+              <div
+                style={{
+                  fontSize: 9,
+                  color: "#575757",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  marginBottom: 5,
+                }}
               >
-                {data.score.toLocaleString()}
-              </span>
-              {nextTier && (
-                <span className="text-xs text-[#94a3b8]">
-                  → {nextTier.ptsNeeded.toLocaleString()} to {TIERS[nextTier.tier].label}
-                </span>
-              )}
+                Protocol Anchor
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: "#f5f5f5",
+                  letterSpacing: "0.04em",
+                  fontWeight: 300,
+                }}
+              >
+                SURGE IDENTITY #{String(data.id).padStart(5, "0")}
+              </div>
             </div>
-            {/* Progress bar */}
-            <div className="h-1.5 overflow-hidden rounded-full bg-[#1c1c27]">
-              <motion.div
-                className="h-full rounded-full"
-                style={{ background: `linear-gradient(90deg, ${tier.color}, ${tier.color}99)` }}
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(progressPct, 100)}%` }}
-                transition={{ duration: 1, ease: "easeOut" }}
-              />
+            {/* Tier badge — sharp corners, red outline */}
+            <div
+              style={{
+                fontSize: 9,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "#ca5454",
+                border: "1px solid #ca5454",
+                padding: "4px 10px",
+              }}
+            >
+              {tier.label}
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="h-px bg-[#1c1c27]" />
-
-          {/* Stats row */}
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <StatItem label="Wallets" value={data.walletCount} />
-            <StatItem label="Chains" value={data.chainCount} />
-            <StatItem label="Badges" value={data.badgeCount} />
+          {/* Score section */}
+          <div
+            className="relative"
+            style={{
+              textAlign: "center",
+              padding: "20px 0",
+              borderTop: "1px solid #2a2a2a",
+              borderBottom: "1px solid #2a2a2a",
+              marginBottom: 20,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 9,
+                color: "#575757",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                marginBottom: 10,
+              }}
+            >
+              Reputation Score
+            </div>
+            <div
+              style={{
+                fontSize: 58,
+                fontWeight: 300,
+                color: "#f5f5f5",
+                lineHeight: 1,
+                letterSpacing: "-0.03em",
+              }}
+            >
+              {data.score.toLocaleString()}
+            </div>
+            <div
+              style={{
+                fontSize: 9,
+                color: "#575757",
+                letterSpacing: "0.18em",
+                marginTop: 6,
+              }}
+            >
+              PTS
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-center">
-            <StatItem label="Streak" value={`${data.streakDays}d`} />
-            <StatItem label="Since" value={data.memberSince} />
+          {/* Metrics */}
+          <div
+            className="relative"
+            style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 20 }}
+          >
+            {metrics.map((metric) => (
+              <div key={metric.label}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: 6,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: "#aaaaaa",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                    }}
+                  >
+                    {metric.label}
+                  </span>
+                  <span style={{ fontSize: 10, color: "#f5f5f5" }}>{metric.value}%</span>
+                </div>
+                <div
+                  style={{
+                    height: 1,
+                    background: "#2a2a2a",
+                    overflow: "hidden",
+                  }}
+                >
+                  <motion.div
+                    style={{
+                      height: "100%",
+                      background: "linear-gradient(90deg, #ca5454, #e07070)",
+                    }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${metric.value}%` }}
+                    transition={{
+                      duration: 1.2,
+                      ease: [0.4, 0, 0.2, 1],
+                      delay: 0.3,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Divider */}
-          <div className="h-px bg-[#1c1c27]" />
-
-          {/* Skill bars */}
-          <div className="flex flex-col gap-1.5">
-            <SkillBar label="DeFi" value={data.defiPct} color="#6366f1" />
-            <SkillBar label="Builder" value={data.builderPct} color="#8b5cf6" />
-            <SkillBar label="Gov" value={data.govPct} color="#06b6d4" />
+          {/* Footer */}
+          <div
+            className="relative"
+            style={{
+              paddingTop: 16,
+              borderTop: "1px solid #2a2a2a",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: 9,
+                  color: "#444",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                }}
+              >
+                Verification Hash
+              </div>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontFamily: "monospace",
+                  color: "#aaaaaa",
+                  marginTop: 3,
+                }}
+              >
+                {shortHash(data.id)}
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: 9,
+                color: "#575757",
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+              }}
+            >
+              ⬡ Superchain
+            </div>
           </div>
-
-          {/* Holographic overlay for legend */}
-          {data.tier === "legend" && (
-            <div className="holographic-overlay pointer-events-none absolute inset-0 rounded-2xl opacity-20" />
-          )}
         </div>
       </div>
     </motion.div>
-  );
-}
-
-function TierDots({ filled, color }: { filled: number; color: string }) {
-  return (
-    <div className="flex gap-1">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div
-          key={i}
-          className="h-2 w-2 rounded-full transition-all duration-300"
-          style={{
-            background: i < filled ? color : "#2d2d3f",
-            boxShadow: i < filled ? `0 0 6px ${color}88` : "none",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function StatItem({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] tracking-wider text-[#94a3b8] uppercase">{label}</span>
-      <span className="font-mono font-semibold text-[#f1f5f9] tabular-nums">{value}</span>
-    </div>
-  );
-}
-
-function SkillBar({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="w-10 shrink-0 text-[10px] text-[#94a3b8]">◇ {label}</span>
-      <div className="h-1 flex-1 overflow-hidden rounded-full bg-[#1c1c27]">
-        <motion.div
-          className="h-full rounded-full"
-          style={{ background: color }}
-          initial={{ width: 0 }}
-          animate={{ width: `${value}%` }}
-          transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-        />
-      </div>
-      <span className="w-7 text-right font-mono text-[10px] text-[#94a3b8]">{value}%</span>
-    </div>
   );
 }

@@ -1,43 +1,41 @@
+"use client";
+
+const FOOTER_LINKS = [
+  { label: "Legal", href: "#" },
+  { label: "Privacy", href: "#" },
+  { label: "Terms", href: "#" },
+  { label: "Docs", href: "#" },
+];
+
 export function Footer() {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="border-t border-[#1c1c27] px-6 py-12">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 md:flex-row">
-        {/* Brand */}
-        <div className="flex items-center gap-2">
-          <span className="text-lg text-[#6366f1]" aria-hidden="true">
-            ◆
-          </span>
-          <span className="font-display text-lg font-bold tracking-tight text-[#f1f5f9]">
-            SURGE
-          </span>
-          <span className="ml-2 text-sm text-[#64748b]">Protocol</span>
-        </div>
-
-        {/* Links */}
-        <nav aria-label="Footer navigation" className="flex items-center gap-6">
-          {[
-            { label: "Protocol", href: "#" },
-            { label: "Docs", href: "#" },
-            { label: "GitHub", href: "#" },
-            { label: "Twitter", href: "#" },
-          ].map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-sm text-[#94a3b8] transition-colors duration-200 hover:text-[#f1f5f9]"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-
-        {/* Legal */}
-        <p className="text-xs text-[#64748b]">
-          © {currentYear} SURGE Protocol · Built on Optimism Superchain
-        </p>
+    <footer
+      className="flex flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row"
+      style={{ borderTop: "1px solid var(--border)" }}
+    >
+      {/* Copyright */}
+      <div
+        className="text-[11px] font-light tracking-widest uppercase"
+        style={{ color: "rgba(245,245,245,0.35)" }}
+      >
+        © 2024 SURGE PROTOCOL. ALL RIGHTS RESERVED.
       </div>
+
+      {/* Links */}
+      <nav aria-label="Footer navigation" className="flex gap-6">
+        {FOOTER_LINKS.map((link) => (
+          <a
+            key={link.label}
+            href={link.href}
+            className="text-[11px] font-light tracking-widest uppercase transition-colors duration-0"
+            style={{ color: "rgba(245,245,245,0.35)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,245,245,0.35)")}
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
     </footer>
   );
 }

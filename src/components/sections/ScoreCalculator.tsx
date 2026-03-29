@@ -16,7 +16,6 @@ import { viewportOnce } from "@/lib/motion";
 /** Deterministic pseudo-random score from a wallet address. */
 function mockWalletScore(address: string): WalletScore {
   const hex = address.toLowerCase().replace("0x", "").padEnd(40, "0");
-  // Spread entropy across the address bytes
   const bytes = hex.match(/.{2}/g) ?? [];
   const seed = bytes.reduce((acc, b, i) => acc + parseInt(b, 16) * (i + 1), 0);
 
@@ -42,7 +41,6 @@ function mockWalletScore(address: string): WalletScore {
 function calcCombined(wallets: WalletScore[]): CombinedScore {
   const individualTotal = wallets.reduce((s, w) => s + w.score, 0);
   const linkingBonus = wallets.length >= 2 ? 500 + (wallets.length - 2) * 150 : 0;
-  // Cross-chain bonus derived from unique chain counts across wallets
   const uniqueChains = new Set<string>();
   wallets.forEach((w) => {
     for (let i = 0; i < w.chainCount; i++) {
@@ -50,7 +48,6 @@ function calcCombined(wallets: WalletScore[]): CombinedScore {
     }
   });
   const realCrossChain = Math.max(0, uniqueChains.size - 1) * 80;
-
   const combinedScore = individualTotal + linkingBonus + realCrossChain;
   return {
     wallets,
@@ -97,17 +94,26 @@ function WalletCard({ wallet, index, onRemove }: WalletCardProps) {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.85 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative flex flex-col gap-4 rounded-2xl border bg-[#0d0d13] p-5"
-      style={{ borderColor: `${tier.color}30` }}
+      className="group relative flex flex-col gap-4 rounded-lg p-5"
+      style={{
+        border: `1px solid ${tier.color}30`,
+      }}
     >
       {/* Remove button */}
       {onRemove && (
         <button
           onClick={onRemove}
-          className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-[#1c1c27] text-[#94a3b8] opacity-0 transition-colors duration-200 group-hover:opacity-100 hover:bg-[#ef4444]/10 hover:text-[#ef4444] focus-visible:opacity-100"
+          className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded opacity-0 transition-colors duration-200 group-hover:opacity-100 focus-visible:opacity-100"
+          style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "var(--accent)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "var(--text-muted)";
+          }}
           aria-label={`Remove wallet ${shortenAddress(wallet.address)}`}
         >
-          <svg viewBox="0 0 16 16" className="h-3 w-3" fill="currentColor" aria-hidden="true">
+          <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" aria-hidden="true">
             <path
               d="M4.5 4.5l7 7M11.5 4.5l-7 7"
               stroke="currentColor"
@@ -121,13 +127,13 @@ function WalletCard({ wallet, index, onRemove }: WalletCardProps) {
       {/* Address + tier */}
       <div className="flex items-center gap-3">
         <div
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded font-mono text-xs font-bold"
           style={{ background: `${tier.color}20`, color: tier.color }}
         >
           {index + 1}
         </div>
         <div className="flex min-w-0 flex-col">
-          <span className="truncate font-mono text-sm text-[#f1f5f9]">
+          <span className="truncate font-mono text-sm" style={{ color: "var(--text)" }}>
             {shortenAddress(wallet.address)}
           </span>
           <span className="text-xs" style={{ color: tier.color }}>
@@ -144,7 +150,9 @@ function WalletCard({ wallet, index, onRemove }: WalletCardProps) {
         >
           {wallet.score.toLocaleString()}
         </span>
-        <span className="text-xs text-[#94a3b8]">{wallet.txCount} txs</span>
+        <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+          {wallet.txCount} txs
+        </span>
       </div>
 
       {/* Activity bars */}
@@ -155,8 +163,13 @@ function WalletCard({ wallet, index, onRemove }: WalletCardProps) {
           { label: "Build", pct: builderPct },
         ].map((bar) => (
           <div key={bar.label} className="flex items-center gap-2">
-            <span className="w-8 shrink-0 text-[10px] text-[#64748b]">{bar.label}</span>
-            <div className="h-1 flex-1 overflow-hidden rounded-full bg-[#1c1c27]">
+            <span className="w-8 shrink-0 text-[10px]" style={{ color: "var(--text-muted)" }}>
+              {bar.label}
+            </span>
+            <div
+              className="h-1 flex-1 overflow-hidden rounded-full"
+              style={{ background: "var(--surface-2)" }}
+            >
               <motion.div
                 className="h-full rounded-full"
                 style={{ background: tier.color }}
@@ -165,7 +178,9 @@ function WalletCard({ wallet, index, onRemove }: WalletCardProps) {
                 transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
               />
             </div>
-            <span className="w-7 text-right text-[10px] text-[#64748b]">{bar.pct}%</span>
+            <span className="w-7 text-right text-[10px]" style={{ color: "var(--text-muted)" }}>
+              {bar.pct}%
+            </span>
           </div>
         ))}
       </div>
@@ -192,23 +207,24 @@ function CombinedResultCard({ result }: CombinedResultCardProps) {
       initial={{ opacity: 0, scale: 0.92, y: 24 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-2xl"
+      className="relative overflow-hidden rounded-lg"
       style={{
-        background: `linear-gradient(135deg, #13131a 0%, #0d0d13 100%)`,
         border: `1px solid ${tier.color}40`,
-        boxShadow: `0 0 60px ${tier.glowColor}`,
       }}
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between px-8 py-4"
+        className="flex items-center justify-between px-6 py-4"
         style={{ borderBottom: `1px solid ${tier.color}20` }}
       >
-        <span className="text-xs font-semibold tracking-widest text-[#94a3b8] uppercase">
+        <span
+          className="text-xs font-semibold tracking-widest uppercase"
+          style={{ color: "var(--text-muted)" }}
+        >
           Combined Identity Score
         </span>
         <span
-          className="rounded-full px-2.5 py-1 text-xs font-bold"
+          className="rounded px-2.5 py-1 text-xs font-bold"
           style={{ background: `${tier.color}20`, color: tier.color }}
         >
           {tier.label}
@@ -216,7 +232,7 @@ function CombinedResultCard({ result }: CombinedResultCardProps) {
       </div>
 
       {/* Main score */}
-      <div className="flex flex-col gap-6 px-8 py-8">
+      <div className="flex flex-col gap-6 px-6 py-6">
         <div className="flex items-center gap-4">
           <motion.span
             className="font-display text-6xl font-bold tabular-nums"
@@ -227,39 +243,44 @@ function CombinedResultCard({ result }: CombinedResultCardProps) {
           >
             {result.combinedScore.toLocaleString()}
           </motion.span>
-          <div className="flex flex-col gap-0.5 text-sm text-[#94a3b8]">
-            <span className="font-semibold text-[#f1f5f9]">pts</span>
+          <div className="flex flex-col gap-0.5 text-sm" style={{ color: "var(--text-muted)" }}>
+            <span className="font-semibold" style={{ color: "var(--text)" }}>
+              pts
+            </span>
             <span>SURGE Score</span>
           </div>
         </div>
 
         {/* Score breakdown */}
-        <div className="flex flex-col gap-2 rounded-xl bg-[#0a0a0f] p-4">
+        <div
+          className="flex flex-col gap-2 rounded-lg p-4"
+          style={{ background: "var(--surface-2)" }}
+        >
           <div className="flex items-center justify-between text-sm">
-            <span className="text-[#94a3b8]">Individual wallets</span>
-            <span className="font-mono text-[#f1f5f9]">
+            <span style={{ color: "var(--text-muted)" }}>Individual wallets</span>
+            <span className="font-mono" style={{ color: "var(--text)" }}>
               +{result.individualTotal.toLocaleString()}
             </span>
           </div>
           {result.linkingBonus > 0 && (
             <div className="flex items-center justify-between text-sm">
-              <span className="text-[#10b981]">Multi-wallet linking bonus</span>
-              <span className="font-mono text-[#10b981]">
+              <span style={{ color: "var(--success)" }}>Multi-wallet linking bonus</span>
+              <span className="font-mono" style={{ color: "var(--success)" }}>
                 +{result.linkingBonus.toLocaleString()}
               </span>
             </div>
           )}
           {result.crossChainBonus > 0 && (
             <div className="flex items-center justify-between text-sm">
-              <span className="text-[#10b981]">Cross-chain coverage bonus</span>
-              <span className="font-mono text-[#10b981]">
+              <span style={{ color: "var(--success)" }}>Cross-chain coverage bonus</span>
+              <span className="font-mono" style={{ color: "var(--success)" }}>
                 +{result.crossChainBonus.toLocaleString()}
               </span>
             </div>
           )}
-          <div className="mt-1 h-px bg-[#1c1c27]" />
+          <div className="mt-1 h-px" style={{ background: "var(--border)" }} />
           <div className="flex items-center justify-between text-sm font-semibold">
-            <span className="text-[#f1f5f9]">Combined total</span>
+            <span style={{ color: "var(--text)" }}>Combined total</span>
             <span className="font-mono" style={{ color: tier.color }}>
               {result.combinedScore.toLocaleString()}
             </span>
@@ -268,23 +289,31 @@ function CombinedResultCard({ result }: CombinedResultCardProps) {
 
         {/* Tier progress */}
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between text-xs text-[#94a3b8]">
+          <div
+            className="flex items-center justify-between text-xs"
+            style={{ color: "var(--text-muted)" }}
+          >
             <span>{tier.label}</span>
             {result.nextTier ? (
               <span>
                 {TIERS[result.nextTier.tier].label} in{" "}
-                <strong className="text-[#f1f5f9]">
+                <strong style={{ color: "var(--text)" }}>
                   {result.nextTier.ptsNeeded.toLocaleString()} pts
                 </strong>
               </span>
             ) : (
-              <span className="font-semibold text-[#f59e0b]">MAX TIER</span>
+              <span className="font-semibold" style={{ color: tier.color }}>
+                MAX TIER
+              </span>
             )}
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-[#1c1c27]">
+          <div
+            className="h-1.5 overflow-hidden rounded-full"
+            style={{ background: "var(--surface-2)" }}
+          >
             <motion.div
               className="h-full rounded-full"
-              style={{ background: `linear-gradient(90deg, ${tier.color}, ${tier.color}cc)` }}
+              style={{ background: tier.color }}
               initial={{ width: 0 }}
               animate={{ width: `${progressPct}%` }}
               transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
@@ -294,15 +323,13 @@ function CombinedResultCard({ result }: CombinedResultCardProps) {
 
         {/* CTA */}
         <button
-          className="group relative w-full overflow-hidden rounded-xl py-3.5 text-sm font-bold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6366f1]"
+          className="w-full rounded px-6 py-3.5 text-sm font-bold text-white transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          style={{ background: "var(--accent)" }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
           aria-label="Claim your SURGE Identity"
         >
-          <span className="absolute inset-0 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] transition-opacity duration-300" />
-          <span className="absolute inset-0 bg-gradient-to-r from-[#6366f1] to-[#06b6d4] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-          <span className="relative flex items-center justify-center gap-2">
-            <span aria-hidden="true">◆</span>
-            Claim Your SURGE Identity
-          </span>
+          Claim Your SURGE Identity
         </button>
       </div>
     </motion.div>
@@ -358,12 +385,11 @@ export function ScoreCalculator() {
   };
 
   return (
-    <section id="score-calculator" className="relative overflow-hidden px-6 py-32">
-      {/* Background */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute bottom-0 left-1/2 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-[#8b5cf6] opacity-[0.05] blur-[100px]" />
-      </div>
-
+    <section
+      id="score-calculator"
+      className="px-6 py-28"
+      style={{ borderTop: "1px solid var(--border)" }}
+    >
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <motion.div
@@ -373,16 +399,19 @@ export function ScoreCalculator() {
           viewport={viewportOnce}
           transition={{ duration: 0.7 }}
         >
-          <p className="mb-4 text-sm font-semibold tracking-[0.2em] text-[#8b5cf6] uppercase">
+          <p
+            className="mb-4 text-xs font-light tracking-[0.2em] uppercase"
+            style={{ color: "var(--text-muted)" }}
+          >
             Score Calculator
           </p>
-          <h2 className="font-display text-4xl leading-tight font-bold text-[#f1f5f9] lg:text-5xl">
-            What&apos;s your{" "}
-            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#06b6d4] bg-clip-text text-transparent">
-              SURGE Score?
-            </span>
+          <h2
+            className="font-display text-4xl leading-tight font-light lg:text-5xl"
+            style={{ color: "var(--text)" }}
+          >
+            What&apos;s your <span style={{ color: "var(--accent)" }}>SURGE Score?</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-lg text-lg text-[#94a3b8]">
+          <p className="mx-auto mt-4 max-w-lg text-lg" style={{ color: "var(--text-muted)" }}>
             Add up to {MAX_WALLETS} wallets and see how your combined identity stacks up.
           </p>
         </motion.div>
@@ -398,7 +427,11 @@ export function ScoreCalculator() {
           >
             {/* Input */}
             <div className="flex flex-col gap-3">
-              <label htmlFor="wallet-input" className="text-sm font-semibold text-[#f1f5f9]">
+              <label
+                htmlFor="wallet-input"
+                className="text-sm font-semibold"
+                style={{ color: "var(--text)" }}
+              >
                 Wallet Address
               </label>
               <div className="flex gap-2">
@@ -413,7 +446,14 @@ export function ScoreCalculator() {
                   onKeyDown={handleKeyDown}
                   placeholder="0x…"
                   disabled={wallets.length >= MAX_WALLETS}
-                  className="flex-1 rounded-xl border border-[#1c1c27] bg-[#13131a] px-4 py-3 font-mono text-sm text-[#f1f5f9] placeholder-[#64748b] transition-colors duration-200 focus:outline-none focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-[#6366f1] disabled:opacity-40"
+                  className="flex-1 px-4 py-3 font-mono text-sm transition-colors duration-150 focus:outline-none disabled:opacity-40"
+                  style={{
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    color: "var(--text)",
+                  }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
                   aria-describedby={error ? "wallet-error" : undefined}
                   aria-invalid={!!error}
                   autoComplete="off"
@@ -422,7 +462,13 @@ export function ScoreCalculator() {
                 <button
                   onClick={handleAdd}
                   disabled={wallets.length >= MAX_WALLETS || !input.trim()}
-                  className="shrink-0 rounded-xl bg-[#6366f1] px-4 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#8b5cf6] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6366f1] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0f] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="shrink-0 px-4 py-3 text-sm font-light text-white transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ background: "var(--accent)" }}
+                  onMouseEnter={(e) => {
+                    if (!e.currentTarget.disabled)
+                      e.currentTarget.style.background = "var(--accent-hover)";
+                  }}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
                   aria-label="Add wallet"
                 >
                   Add
@@ -435,7 +481,8 @@ export function ScoreCalculator() {
                   <motion.p
                     id="wallet-error"
                     role="alert"
-                    className="flex items-center gap-1.5 text-xs text-[#ef4444]"
+                    className="flex items-center gap-1.5 text-xs"
+                    style={{ color: "var(--accent)" }}
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
@@ -448,7 +495,7 @@ export function ScoreCalculator() {
               </AnimatePresence>
 
               {/* Wallet count */}
-              <p className="text-xs text-[#64748b]">
+              <p className="text-xs" style={{ color: "var(--text-faint)" }}>
                 {wallets.length}/{MAX_WALLETS} wallets added
                 {wallets.length >= MAX_WALLETS && " — maximum reached"}
               </p>
@@ -463,7 +510,11 @@ export function ScoreCalculator() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex h-28 items-center justify-center rounded-2xl border border-dashed border-[#1c1c27] text-sm text-[#64748b]"
+                    className="flex h-28 items-center justify-center rounded-lg border border-dashed text-sm"
+                    style={{
+                      borderColor: "var(--border)",
+                      color: "var(--text-muted)",
+                    }}
                   >
                     Add a wallet to see its score
                   </motion.div>
@@ -490,18 +541,28 @@ export function ScoreCalculator() {
               >
                 <button
                   onClick={handleCalculate}
-                  className="group relative flex-1 overflow-hidden rounded-xl py-3.5 text-sm font-bold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6366f1]"
+                  className="flex-1 py-3.5 text-sm font-light text-white transition-colors duration-150 focus:outline-none"
+                  style={{ background: "var(--accent)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
                 >
-                  <span className="absolute inset-0 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" />
-                  <span className="absolute inset-0 bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  <span className="relative flex items-center justify-center gap-2">
-                    <span aria-hidden="true">◆</span>
-                    Calculate{wallets.length > 1 ? " Combined" : ""} Score
-                  </span>
+                  Calculate{wallets.length > 1 ? " Combined" : ""} Score
                 </button>
                 <button
                   onClick={handleReset}
-                  className="rounded-xl border border-[#1c1c27] px-4 py-3.5 text-sm font-semibold text-[#94a3b8] transition-all duration-200 hover:border-[#6366f1]/40 hover:text-[#f1f5f9] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6366f1]"
+                  className="px-4 py-3.5 text-sm font-light transition-all duration-200 focus:outline-none"
+                  style={{
+                    border: "1px solid var(--border)",
+                    color: "var(--text-muted)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "var(--border-hover)";
+                    e.currentTarget.style.color = "var(--text)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "var(--border)";
+                    e.currentTarget.style.color = "var(--text-muted)";
+                  }}
                   aria-label="Reset calculator"
                 >
                   Reset
@@ -526,12 +587,13 @@ export function ScoreCalculator() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex h-full min-h-[300px] flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-[#1c1c27] p-8 text-center"
+                  className="flex h-full min-h-[300px] flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-8 text-center"
+                  style={{ borderColor: "var(--border)" }}
                 >
-                  {/* Bespoke placeholder illustration */}
                   <svg
                     viewBox="0 0 80 80"
-                    className="h-16 w-16 text-[#1c1c27]"
+                    className="h-16 w-16"
+                    style={{ color: "var(--border-hover)" }}
                     fill="none"
                     aria-hidden="true"
                   >
@@ -540,7 +602,7 @@ export function ScoreCalculator() {
                       y="16"
                       width="64"
                       height="48"
-                      rx="10"
+                      rx="8"
                       stroke="currentColor"
                       strokeWidth="2"
                     />
@@ -559,8 +621,10 @@ export function ScoreCalculator() {
                     />
                   </svg>
                   <div className="flex flex-col gap-1">
-                    <p className="text-sm font-semibold text-[#64748b]">Your score appears here</p>
-                    <p className="max-w-xs text-xs text-[#64748b]/60">
+                    <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
+                      Your score appears here
+                    </p>
+                    <p className="max-w-xs text-xs" style={{ color: "var(--text-faint)" }}>
                       Add a wallet and click Calculate to see your SURGE identity score.
                     </p>
                   </div>

@@ -1,59 +1,76 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
+import { SurgeLogo } from "@/components/ui/SurgeLogo";
+
+const NAV_LINKS = [
+  { label: "Identity", href: "#", active: true },
+  { label: "Leaderboard", href: "#", active: false },
+  { label: "Drops", href: "#", active: false },
+  { label: "About", href: "#", active: false },
+];
 
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
     <motion.header
-      className="fixed top-0 right-0 left-0 z-50 transition-all duration-300"
+      className="fixed top-0 right-0 left-0 z-50"
       style={{
-        background: scrolled ? "rgba(10,10,15,0.85)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(99,102,241,0.15)" : "none",
+        background: "var(--bg)",
+        borderBottom: "1px solid var(--border)",
       }}
-      initial={{ y: -80, opacity: 0 }}
+      initial={{ y: -64, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+      <div className="flex h-16 items-center justify-between px-6">
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <span className="text-lg text-[#6366f1]">◆</span>
-          <span className="font-display text-lg font-bold tracking-tight text-[#f1f5f9]">
-            SURGE
+        <Link href="/" aria-label="SURGE Protocol home" className="flex items-center">
+          <span style={{ color: "var(--text)" }}>
+            <SurgeLogo size={28} />
           </span>
-        </div>
+        </Link>
 
         {/* Nav links */}
-        <nav className="hidden items-center gap-8 md:flex">
-          {["Protocol", "Leaderboard", "Drops", "Docs"].map((item) => (
+        <nav className="hidden h-full items-center gap-8 md:flex">
+          {NAV_LINKS.map((link) => (
             <a
-              key={item}
-              href="#"
-              className="text-sm text-[#94a3b8] transition-colors duration-200 hover:text-[#f1f5f9]"
+              key={link.label}
+              href={link.href}
+              className="flex h-full items-center text-sm font-light tracking-tight uppercase transition-colors duration-0"
+              style={{
+                color: link.active ? "var(--text)" : "rgba(245,245,245,0.5)",
+                borderBottom: link.active ? "1px solid var(--accent)" : "1px solid transparent",
+              }}
+              onMouseEnter={(e) => {
+                if (!link.active) {
+                  e.currentTarget.style.borderBottomColor = "var(--accent)";
+                  e.currentTarget.style.color = "var(--text)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!link.active) {
+                  e.currentTarget.style.borderBottomColor = "transparent";
+                  e.currentTarget.style.color = "rgba(245,245,245,0.5)";
+                }
+              }}
             >
-              {item}
+              {link.label}
             </a>
           ))}
         </nav>
 
-        {/* CTA */}
-        <button className="group relative overflow-hidden rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:scale-105">
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" />
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#6366f1] to-[#06b6d4] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-          <span className="relative flex items-center gap-2">
-            <span>◆</span>
-            Connect Wallet
-          </span>
+        {/* Connect Wallet */}
+        <button
+          className="px-5 py-2 text-xs font-light tracking-widest uppercase transition-colors duration-0"
+          style={{
+            background: "var(--surface-2)",
+            color: "var(--text)",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent)")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "var(--surface-2)")}
+        >
+          Connect Wallet
         </button>
       </div>
     </motion.header>

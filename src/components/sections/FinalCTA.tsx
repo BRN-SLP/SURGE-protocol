@@ -36,62 +36,41 @@ export function FinalCTA() {
   };
 
   return (
-    <section className="relative overflow-hidden px-6 py-32">
-      {/* Bespoke background glow — mirrors hero but inverted */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute top-1/2 left-1/2 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] opacity-[0.07] blur-[120px]" />
-        {/* Geometric accent top-right */}
-        <svg
-          className="absolute top-0 right-0 h-64 w-64 opacity-[0.04]"
-          viewBox="0 0 256 256"
-          fill="none"
-          aria-hidden="true"
-        >
-          <circle cx="192" cy="64" r="120" stroke="#6366f1" strokeWidth="1" />
-          <circle cx="192" cy="64" r="80" stroke="#8b5cf6" strokeWidth="1" />
-          <circle cx="192" cy="64" r="40" stroke="#06b6d4" strokeWidth="1" />
-        </svg>
-        {/* Geometric accent bottom-left */}
-        <svg
-          className="absolute bottom-0 left-0 h-48 w-48 opacity-[0.04]"
-          viewBox="0 0 192 192"
-          fill="none"
-          aria-hidden="true"
-        >
-          <polygon points="96,8 184,184 8,184" stroke="#6366f1" strokeWidth="1" />
-          <polygon points="96,40 160,168 32,168" stroke="#8b5cf6" strokeWidth="1" />
-        </svg>
-      </div>
-
+    <section className="px-6 py-28" style={{ borderTop: "1px solid var(--border)" }}>
       <div className="mx-auto max-w-3xl text-center">
         <motion.div
-          className="flex flex-col gap-8"
-          initial={reducedMotion ? {} : { opacity: 0, y: 32 }}
+          className="flex flex-col gap-7"
+          initial={reducedMotion ? {} : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={viewportOnce}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.6 }}
         >
-          {/* Badge */}
-          <p className="flex items-center justify-center gap-2 text-sm font-semibold tracking-[0.2em] text-[#6366f1] uppercase">
-            <span aria-hidden="true">◆</span>
+          {/* Label */}
+          <p
+            className="text-xs font-light tracking-[0.2em] uppercase"
+            style={{ color: "var(--accent)" }}
+          >
             Early Access
           </p>
 
           {/* Headline */}
-          <h2 className="font-display text-4xl leading-tight font-bold text-[#f1f5f9] lg:text-5xl">
-            Be first when{" "}
-            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#06b6d4] bg-clip-text text-transparent">
-              SURGE goes live
-            </span>
+          <h2
+            className="font-display text-4xl leading-tight font-light lg:text-5xl"
+            style={{ color: "var(--text)" }}
+          >
+            Be first when <span style={{ color: "var(--accent)" }}>SURGE goes live</span>
           </h2>
 
           {/* Sub-copy */}
-          <p className="mx-auto max-w-xl text-lg leading-relaxed text-[#94a3b8]">
+          <p
+            className="mx-auto max-w-xl text-lg leading-relaxed"
+            style={{ color: "var(--text-muted)" }}
+          >
             Early access members receive a founding-tier Identity Card with a permanently boosted
             score — locked at your join position, forever.
           </p>
 
-          {/* Perks row */}
+          {/* Perks */}
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-3">
             {[
               "Founding member badge",
@@ -99,8 +78,12 @@ export function FinalCTA() {
               "DAO governance weight",
               "Exclusive Drops access",
             ].map((perk) => (
-              <div key={perk} className="flex items-center gap-2 text-sm text-[#94a3b8]">
-                <span className="text-xs text-[#10b981]" aria-hidden="true">
+              <div
+                key={perk}
+                className="flex items-center gap-2 text-sm"
+                style={{ color: "var(--text-muted)" }}
+              >
+                <span style={{ color: "var(--success)" }} aria-hidden="true">
                   ✓
                 </span>
                 {perk}
@@ -108,22 +91,23 @@ export function FinalCTA() {
             ))}
           </div>
 
-          {/* Email form / success */}
+          {/* Form / Success */}
           <AnimatePresence mode="wait">
             {submitted ? (
               <motion.div
                 key="success"
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center gap-3 py-6"
+                className="flex flex-col items-center gap-3 py-5"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#10b981]/30 bg-[#10b981]/20">
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-6 w-6 text-[#10b981]"
-                    fill="none"
-                    aria-hidden="true"
-                  >
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded"
+                  style={{
+                    border: "1px solid var(--border)",
+                    color: "var(--success)",
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
                     <path
                       d="M5 13l4 4L19 7"
                       stroke="currentColor"
@@ -133,10 +117,10 @@ export function FinalCTA() {
                     />
                   </svg>
                 </div>
-                <p className="font-display text-xl font-bold text-[#f1f5f9]">
+                <p className="font-display text-lg font-bold" style={{ color: "var(--text)" }}>
                   You&apos;re on the list
                 </p>
-                <p className="text-sm text-[#94a3b8]">
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
                   We&apos;ll notify you the moment early access opens.
                 </p>
               </motion.div>
@@ -156,7 +140,14 @@ export function FinalCTA() {
                       if (error) setError(null);
                     }}
                     placeholder="your@email.com"
-                    className="w-full rounded-xl border border-[#1c1c27] bg-[#13131a] px-4 py-3.5 text-sm text-[#f1f5f9] placeholder-[#64748b] transition-colors duration-200 focus:outline-none focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-[#6366f1]"
+                    className="w-full px-4 py-3 text-sm transition-colors duration-150 focus:outline-none"
+                    style={{
+                      background: "var(--surface-2)",
+                      border: "1px solid var(--border)",
+                      color: "var(--text)",
+                    }}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
                     aria-label="Email address for early access"
                     aria-describedby={error ? "cta-error" : undefined}
                     aria-invalid={!!error}
@@ -167,7 +158,8 @@ export function FinalCTA() {
                       <motion.p
                         id="cta-error"
                         role="alert"
-                        className="text-left text-xs text-[#ef4444]"
+                        className="text-left text-xs"
+                        style={{ color: "var(--accent)" }}
                         initial={{ opacity: 0, y: -4 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
@@ -181,19 +173,23 @@ export function FinalCTA() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group relative shrink-0 overflow-hidden rounded-xl px-6 py-3.5 text-sm font-bold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6366f1] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0f] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="shrink-0 px-6 py-3 text-sm font-light text-white transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                  style={{ background: "var(--accent)" }}
+                  onMouseEnter={(e) =>
+                    !loading && (e.currentTarget.style.background = "var(--accent-hover)")
+                  }
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
                 >
-                  <span className="absolute inset-0 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" />
-                  <span className="absolute inset-0 bg-gradient-to-r from-[#6366f1] to-[#06b6d4] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  <span className="relative">{loading ? "Sending…" : "Get Early Access"}</span>
+                  {loading ? "Sending…" : "Get Early Access"}
                 </button>
               </motion.form>
             )}
           </AnimatePresence>
 
-          {/* Fine print */}
           {!submitted && (
-            <p className="text-xs text-[#64748b]">No spam. No noise. One email when we launch.</p>
+            <p className="text-xs" style={{ color: "var(--text-faint)" }}>
+              No spam. No noise. One email when we launch.
+            </p>
           )}
         </motion.div>
       </div>

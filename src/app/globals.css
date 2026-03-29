@@ -1,72 +1,74 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Brand Colors ─────────────────────────────────────── */
-  --color-brand-primary: #6366f1; /* Indigo 500 — Signal  */
-  --color-brand-secondary: #8b5cf6; /* Violet 500 — Shard   */
-  --color-brand-accent: #06b6d4; /* Cyan 500   — Pulse   */
-
-  /* ── Background & Surface ────────────────────────────── */
-  --color-bg: #0a0a0f; /* Deep Space           */
-  --color-surface: #13131a; /* Card surfaces        */
-  --color-surface-2: #1c1c27; /* Elevated surfaces    */
-
-  /* ── Text ────────────────────────────────────────────── */
-  --color-text: #f1f5f9; /* Slate 100            */
-  --color-text-muted: #94a3b8; /* Slate 400            */
-
-  /* ── Semantic ────────────────────────────────────────── */
-  --color-success: #10b981; /* Emerald 500          */
-  --color-warning: #f59e0b; /* Amber 500            */
-  --color-danger: #ef4444; /* Red 500              */
-
-  /* ── Tier Colors ─────────────────────────────────────── */
-  --color-tier-newcomer: #64748b; /* Slate 500            */
-  --color-tier-explorer: #6366f1; /* Indigo 500           */
-  --color-tier-contributor: #8b5cf6; /* Violet 500           */
-  --color-tier-veteran: #06b6d4; /* Cyan 500             */
-  --color-tier-legend: #f59e0b; /* Amber 500 (gold)     */
-
-  /* ── Brand Gradient ──────────────────────────────────── */
-  --gradient-sovereign: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
-
-  /* ── Fonts ───────────────────────────────────────────── */
-  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), "Courier New", monospace;
+  --font-display: var(--font-roboto-condensed), sans-serif;
+  --font-sans: var(--font-roboto-condensed), sans-serif;
+  --font-mono: ui-monospace, "Courier New", monospace;
 }
 
-/* ── Base ──────────────────────────────────────────────── */
+/* ── Dark theme (default) ───────────────────────────────── */
+:root {
+  --bg: #0e0e0e;
+  --surface: #141414;
+  --surface-2: #353534;
+  --text: #f5f5f5;
+  --text-muted: #aaaaaa;
+  --text-faint: #444444;
+  --border: #2a2a2a;
+  --border-hover: #3a3a3a;
+  --accent: #dc3333;
+  --accent-hover: #c42020;
+  --success: #22aa66;
+}
+
+/* ── Light theme ────────────────────────────────────────── */
+.light {
+  --bg: #f5f5f5;
+  --surface: #ffffff;
+  --surface-2: #ebebeb;
+  --text: #0e0e0e;
+  --text-muted: #666666;
+  --text-faint: #aaaaaa;
+  --border: #d4d4d4;
+  --border-hover: #bbbbbb;
+  --accent: #dc3333;
+  --accent-hover: #c42020;
+  --success: #18884d;
+}
+
+/* ── Base ───────────────────────────────────────────────── */
 html {
-  background-color: #0a0a0f;
-  color: #f1f5f9;
-  color-scheme: dark;
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-roboto-condensed), var(--font-sans), sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
-/* ── Scrollbar ─────────────────────────────────────────── */
+/* ── Scrollbar ──────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #13131a;
+  background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1c1c27;
-  border-radius: 3px;
+  background: var(--border);
+  border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #6366f1;
+  background: var(--accent);
 }
 
-/* ── Selection ─────────────────────────────────────────── */
+/* ── Selection ──────────────────────────────────────────── */
 ::selection {
-  background-color: #6366f133;
-  color: #f1f5f9;
+  background-color: rgba(220, 51, 51, 0.2);
+  color: var(--text);
 }

@@ -8,14 +8,16 @@ import { Footer } from "@/components/layout/Footer";
 
 export default function HomePage() {
   return (
-    <main className="flex flex-col">
+    <>
       <Navbar />
-      <HeroSection />
-      <ProblemSection />
-      <HowItWorksSection />
-      <ScoreCalculator />
-      <FinalCTA />
+      <main className="flex flex-col">
+        <HeroSection />
+        <ProblemSection />
+        <HowItWorksSection />
+        <ScoreCalculator />
+        <FinalCTA />
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }
