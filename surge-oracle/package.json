@@ -1,0 +1,16 @@
+{
+  "name": "surge-oracle",
+  "version": "1.0.0",
+  "description": "SURGE Protocol oracle — awards score points for on-chain activity",
+  "scripts": {
+    "run": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "viem": "^2.47.6"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.3"
+  }
+}

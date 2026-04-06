@@ -1,0 +1,43 @@
+name: SURGE Oracle
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"   # Every 6 hours
+  workflow_dispatch:          # Manual trigger for testing
+
+permissions:
+  contents: write             # Needed to commit oracle-state.json
+
+jobs:
+  oracle:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: surge-oracle
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run oracle
+        env:
+          ORACLE_PRIVATE_KEY: ${{ secrets.ORACLE_PRIVATE_KEY }}
+        run: npm run run
+
+      - name: Commit updated oracle state
+        run: |
+          git config user.name "SURGE Oracle"
+          git config user.email "oracle@surge-protocol.xyz"
+          git add oracle-state.json
+          git diff --staged --quiet || git commit -m "chore: oracle state $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push
