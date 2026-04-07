@@ -1,6 +1,6 @@
 import { createPublicClient, createWalletClient, http, type Chain } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { ORACLE_CHAINS, SURGE_SCORE_ADDRESS } from "./chains.js";
+import { ORACLE_CHAINS, SURGE_SCORE_ADDRESSES } from "./chains.js";
 import { getIdentityHolders, computeScores, encodeReason, SURGE_SCORE_ABI } from "./scoring.js";
 import { loadState, saveState } from "./state.js";
 
@@ -59,7 +59,7 @@ async function main() {
     // Find NEW identity mints since last run and add to known holders
     let newHolders: `0x${string}`[] = [];
     try {
-      newHolders = await getIdentityHolders(publicClient, fromBlock, latestBlock);
+      newHolders = await getIdentityHolders(publicClient, fromBlock, latestBlock, chain.id);
     } catch (err) {
       console.error(`  Failed to fetch new identity holders: ${err}`);
     }
@@ -81,7 +81,7 @@ async function main() {
     // Compute score deltas
     let scores;
     try {
-      scores = await computeScores(publicClient, wallets, fromBlock, latestBlock);
+      scores = await computeScores(publicClient, wallets, fromBlock, latestBlock, chain.id);
     } catch (err) {
       console.error(`  Failed to compute scores: ${err}`);
       continue;
@@ -93,8 +93,10 @@ async function main() {
     let submitted = 0;
     for (const { wallet, points, reason } of scores) {
       try {
+        const scoreAddress = SURGE_SCORE_ADDRESSES[chain.id];
+        if (!scoreAddress) continue;
         const hash = await walletClient.writeContract({
-          address: SURGE_SCORE_ADDRESS,
+          address: scoreAddress,
           abi: SURGE_SCORE_ABI,
           functionName: "addScore",
           args: [wallet, BigInt(points), encodeReason(reason)],

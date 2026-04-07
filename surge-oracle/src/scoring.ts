@@ -1,5 +1,5 @@
 import type { PublicClient } from "viem";
-import { SURGE_IDENTITY_ADDRESS } from "./chains.js";
+import { SURGE_IDENTITY_ADDRESSES } from "./chains.js";
 
 // ── ABIs ──────────────────────────────────────────────────────
 
@@ -17,27 +17,38 @@ export const SURGE_SCORE_ABI = [
   },
 ] as const;
 
-const IDENTITY_MINTED_ABI = [
-  {
-    type: "event",
-    name: "IdentityMinted",
-    inputs: [
-      { name: "to", type: "address", indexed: true },
-      { name: "tokenId", type: "uint256", indexed: true },
-      { name: "position", type: "uint256", indexed: false },
-    ],
-    anonymous: false,
-  },
-] as const;
+// IdentityMinted(address indexed wallet, uint256 indexed identityId, uint256 position)
+const IDENTITY_MINTED_EVENT = {
+  type: "event",
+  name: "IdentityMinted",
+  inputs: [
+    { name: "wallet", type: "address", indexed: true },
+    { name: "identityId", type: "uint256", indexed: true },
+    { name: "position", type: "uint256", indexed: false },
+  ],
+  anonymous: false,
+} as const;
+
+// WalletLinked(uint256 indexed identityId, address indexed newWallet, bool promotedToSecurity)
+const WALLET_LINKED_EVENT = {
+  type: "event",
+  name: "WalletLinked",
+  inputs: [
+    { name: "identityId", type: "uint256", indexed: true },
+    { name: "newWallet", type: "address", indexed: true },
+    { name: "promotedToSecurity", type: "bool", indexed: false },
+  ],
+  anonymous: false,
+} as const;
 
 // ── Wallet discovery ──────────────────────────────────────────
 
 // Public RPCs limit eth_getLogs to 10k blocks per request.
 const LOG_CHUNK = 9_000n;
 
-async function getLogsInChunks(
+async function getMintLogs(
   client: PublicClient,
-  params: { address: `0x${string}`; event: (typeof IDENTITY_MINTED_ABI)[0] },
+  address: `0x${string}`,
   fromBlock: bigint,
   toBlock: bigint,
 ) {
@@ -45,30 +56,70 @@ async function getLogsInChunks(
   for (let from = fromBlock; from <= toBlock; from += LOG_CHUNK) {
     const to = from + LOG_CHUNK - 1n > toBlock ? toBlock : from + LOG_CHUNK - 1n;
     try {
-      const chunk = await client.getLogs({ ...params, fromBlock: from, toBlock: to });
+      const chunk = await client.getLogs({
+        address,
+        event: IDENTITY_MINTED_EVENT,
+        fromBlock: from,
+        toBlock: to,
+      });
       allLogs.push(...chunk);
     } catch {
-      // skip chunk silently — best effort
+      /* skip chunk silently */
     }
   }
   return allLogs;
 }
 
+async function getLinkLogs(
+  client: PublicClient,
+  address: `0x${string}`,
+  fromBlock: bigint,
+  toBlock: bigint,
+) {
+  const allLogs = [];
+  for (let from = fromBlock; from <= toBlock; from += LOG_CHUNK) {
+    const to = from + LOG_CHUNK - 1n > toBlock ? toBlock : from + LOG_CHUNK - 1n;
+    try {
+      const chunk = await client.getLogs({
+        address,
+        event: WALLET_LINKED_EVENT,
+        fromBlock: from,
+        toBlock: to,
+      });
+      allLogs.push(...chunk);
+    } catch {
+      /* skip chunk silently */
+    }
+  }
+  return allLogs;
+}
+
+/**
+ * Discover all wallet addresses for a chain by scanning:
+ * 1. IdentityMinted events (wallet minted their own identity)
+ * 2. WalletLinked events (wallet linked to an existing identity)
+ */
 export async function getIdentityHolders(
   client: PublicClient,
   fromBlock: bigint,
   toBlock: bigint,
+  chainId: number,
 ): Promise<`0x${string}`[]> {
-  const logs = await getLogsInChunks(
-    client,
-    { address: SURGE_IDENTITY_ADDRESS, event: IDENTITY_MINTED_ABI[0] },
-    fromBlock,
-    toBlock,
-  );
-  const addresses = logs
-    .map((l) => l.args.to as `0x${string}` | undefined)
+  const identityAddress = SURGE_IDENTITY_ADDRESSES[chainId];
+  if (!identityAddress) return [];
+
+  const [mintLogs, linkLogs] = await Promise.all([
+    getMintLogs(client, identityAddress, fromBlock, toBlock),
+    getLinkLogs(client, identityAddress, fromBlock, toBlock),
+  ]);
+
+  const mintedWallets = mintLogs.map((l) => l.args.wallet).filter((a): a is `0x${string}` => !!a);
+
+  const linkedWallets = linkLogs
+    .map((l) => l.args.newWallet)
     .filter((a): a is `0x${string}` => !!a);
-  return [...new Set(addresses)];
+
+  return [...new Set([...mintedWallets, ...linkedWallets])];
 }
 
 // ── Scoring ───────────────────────────────────────────────────
@@ -84,19 +135,28 @@ export async function computeScores(
   wallets: `0x${string}`[],
   fromBlock: bigint,
   toBlock: bigint,
+  chainId: number,
 ): Promise<ScoringResult[]> {
   const results: ScoringResult[] = [];
+  const identityAddress = SURGE_IDENTITY_ADDRESSES[chainId];
+  if (!identityAddress) return [];
 
-  // Check for new identity mints in this block range
-  const mintLogs = await getLogsInChunks(
-    client,
-    { address: SURGE_IDENTITY_ADDRESS, event: IDENTITY_MINTED_ABI[0] },
-    fromBlock,
-    toBlock,
-  );
-  const newWallets = new Set(
+  // Check for new identity mints and new linked wallets in this block range
+  const [mintLogs, linkLogs] = await Promise.all([
+    getMintLogs(client, identityAddress, fromBlock, toBlock),
+    getLinkLogs(client, identityAddress, fromBlock, toBlock),
+  ]);
+
+  const newMinters = new Set(
     mintLogs
-      .map((l) => l.args.to as string | undefined)
+      .map((l) => l.args.wallet)
+      .filter(Boolean)
+      .map((a) => a!.toLowerCase()),
+  );
+
+  const newLinkers = new Set(
+    linkLogs
+      .map((l) => l.args.newWallet)
       .filter(Boolean)
       .map((a) => a!.toLowerCase()),
   );
@@ -108,9 +168,16 @@ export async function computeScores(
 
     await Promise.all(
       batch.map(async (wallet) => {
+        const walletLower = wallet.toLowerCase();
+
         // One-time identity creation bonus
-        if (newWallets.has(wallet.toLowerCase())) {
+        if (newMinters.has(walletLower)) {
           results.push({ wallet, points: 50, reason: "oracle.joined" });
+        }
+
+        // Wallet link bonus — rewarded for linking a new wallet
+        if (newLinkers.has(walletLower)) {
+          results.push({ wallet, points: 20, reason: "oracle.wallet_linked" });
         }
 
         // Transaction count delta between fromBlock and toBlock
