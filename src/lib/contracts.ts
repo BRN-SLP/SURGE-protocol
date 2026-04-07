@@ -10,6 +10,7 @@ export const SURGE_IDENTITY_ADDRESSES: Record<number, `0x${string}`> = {
   919: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811", // Mode Sepolia
   999999999: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811", // Zora Sepolia
   1946: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811", // Soneium Minato
+  11142220: "0x27a4381ef8c9184fa82e7d13af96f562bcfe213b", // Celo Sepolia
 };
 
 export const SURGE_SCORE_ADDRESSES: Record<number, `0x${string}`> = {
@@ -22,6 +23,7 @@ export const SURGE_SCORE_ADDRESSES: Record<number, `0x${string}`> = {
   919: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
   999999999: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
   1946: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
+  11142220: "0xff56358a8303060d117003ea1d6b0328af4615fa", // Celo Sepolia
 };
 
 export const SURGE_ATTESTATION_ADDRESSES: Record<number, `0x${string}`> = {
@@ -34,6 +36,7 @@ export const SURGE_ATTESTATION_ADDRESSES: Record<number, `0x${string}`> = {
   919: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
   999999999: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
   1946: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
+  11142220: "0x9907bbe59b454aaf0a48b9346e34628081c4c107", // Celo Sepolia
 };
 
 export const SURGE_BADGE_ADDRESSES: Record<number, `0x${string}`> = {
@@ -46,6 +49,7 @@ export const SURGE_BADGE_ADDRESSES: Record<number, `0x${string}`> = {
   919: "0x12B9DDcE9A0C73cec7bF5fCB089712Ce242eaeb1",
   999999999: "0x12B9DDcE9A0C73cec7bF5fCB089712Ce242eaeb1",
   1946: "0x12B9DDcE9A0C73cec7bF5fCB089712Ce242eaeb1",
+  11142220: "0xf85eec2f56522ee12ec12f53b2bdf9917d68455f", // Celo Sepolia
 };
 
 // Default to Base Sepolia for backwards-compat single-address exports

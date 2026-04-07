@@ -4,7 +4,8 @@ export type DirectReadChainKey =
   | "ink-sepolia"
   | "world-chain-sepolia"
   | "soneium-minato"
-  | "unichain-sepolia";
+  | "unichain-sepolia"
+  | "celo-sepolia";
 export type ChainKey = SubgraphChainKey | DirectReadChainKey;
 
 export interface ChainConfig {
@@ -77,6 +78,13 @@ export const CHAIN_CONFIGS: ChainConfig[] = [
     name: "Unichain Sepolia",
     shortName: "Unichain",
     chainId: 1301,
+    subgraphUrl: null,
+  },
+  {
+    key: "celo-sepolia",
+    name: "Celo Sepolia",
+    shortName: "Celo",
+    chainId: 11142220,
     subgraphUrl: null,
   },
 ];
