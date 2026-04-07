@@ -24,6 +24,8 @@ import { useChainScores } from "@/hooks/useChainScores";
 import { getTierFromScore } from "@/types";
 import type { IdentityCardData } from "@/types";
 import { OnboardingTour } from "@/components/dashboard/OnboardingTour";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { SkeletonShimmer } from "@/components/ui/SkeletonShimmer";
 import { Share2, TrendingUp } from "lucide-react";
 
 const TABS = [
@@ -40,7 +42,7 @@ export default function IdentityPage() {
   const { address } = useAccount();
   const identityId = Number(tokenId ?? 0);
   const { wallets } = useWalletManagement(identityId);
-  const { activities, badges, quests, timeline, scoreHistory, domainBreakdown, mintedAt } =
+  const { activities, badges, quests, timeline, scoreHistory, domainBreakdown, mintedAt, loading } =
     useDashboardData(tokenId, wallets.length);
   const { claimable, claim, isClaiming, isClaimed, refetchCanClaim } = useBadges();
   const { chainScores, totalScore } = useChainScores(address);
@@ -100,32 +102,44 @@ export default function IdentityPage() {
         <TabBar tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
       <ScrollableRegion style={{ padding: "16px" }}>
-        {activeTab === "pulse" && (
-          <ScorePulseTab
-            activities={activities}
-            scoreHistory={scoreHistory}
-            domainBreakdown={domainBreakdown}
-            currentScore={totalScore}
-            chainScores={chainScores}
-          />
+        {loading ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <SkeletonShimmer height={44} />
+            <SkeletonShimmer height={120} />
+            <SkeletonShimmer height={44} />
+            <SkeletonShimmer height={44} />
+            <SkeletonShimmer height={44} />
+          </div>
+        ) : (
+          <ErrorBoundary>
+            {activeTab === "pulse" && (
+              <ScorePulseTab
+                activities={activities}
+                scoreHistory={scoreHistory}
+                domainBreakdown={domainBreakdown}
+                currentScore={totalScore}
+                chainScores={chainScores}
+              />
+            )}
+            {activeTab === "wallets" && <WalletsTab wallets={wallets} />}
+            {activeTab === "badges" && (
+              <BadgesTab
+                badges={badges}
+                claimable={claimable}
+                onClaim={claim}
+                isClaiming={isClaiming}
+              />
+            )}
+            {activeTab === "timeline" && <TimelineTab events={timeline} />}
+            {activeTab === "quests" && <QuestsTab quests={quests} />}
+          </ErrorBoundary>
         )}
-        {activeTab === "wallets" && <WalletsTab wallets={wallets} />}
-        {activeTab === "badges" && (
-          <BadgesTab
-            badges={badges}
-            claimable={claimable}
-            onClaim={claim}
-            isClaiming={isClaiming}
-          />
-        )}
-        {activeTab === "timeline" && <TimelineTab events={timeline} />}
-        {activeTab === "quests" && <QuestsTab quests={quests} />}
       </ScrollableRegion>
     </>
   );
 
   return (
-    <>
+    <ErrorBoundary>
       <Navbar />
       <ViewportContainer style={{ display: "flex", flexDirection: "column" }}>
         <CompactHeader
@@ -154,6 +168,6 @@ export default function IdentityPage() {
         <SplitLayout sidebarWidth="320px" sidebar={sidebar} main={main} gap="0" />
       </ViewportContainer>
       <OnboardingTour />
-    </>
+    </ErrorBoundary>
   );
 }
