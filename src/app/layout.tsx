@@ -25,12 +25,16 @@ export const metadata: Metadata = {
     description: "Your Reputation. Your Identity. Unchained. One identity across every wallet.",
     type: "website",
     locale: "en_US",
+    url: "https://surge-protocol.xyz",
+    siteName: "SURGE Protocol",
   },
   twitter: {
     card: "summary_large_image",
     title: "SURGE Protocol",
     description: "Your Reputation. Your Identity. Unchained.",
+    site: "@SURGEprotocol",
   },
+  metadataBase: new URL("https://surge-protocol.xyz"),
 };
 
 export default function RootLayout({

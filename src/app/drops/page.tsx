@@ -1,10 +1,16 @@
-"use client";
 import { Navbar } from "@/components/layout/Navbar";
 import { DropsHub } from "@/components/sections/DropsHub";
 import { BorderVariantProvider } from "@/components/providers/BorderVariantProvider";
 import { ViewportContainer } from "@/components/layout/ViewportContainer";
 import { CompactHeader } from "@/components/layout/CompactHeader";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Drops Hub",
+  description:
+    "Claim exclusive token drops available only to SURGE Identity holders. Live, upcoming, and ended distributions.",
+};
 
 export default function DropsPage() {
   return (
