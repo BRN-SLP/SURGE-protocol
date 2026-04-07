@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useReadContracts } from "wagmi";
 import { CHAIN_CONFIGS, type ChainKey } from "@/lib/chains";
-import { SURGE_SCORE_ADDRESS, surgeScoreAbi } from "@/lib/contracts";
+import { SURGE_SCORE_ADDRESSES, surgeScoreAbi } from "@/lib/contracts";
 
 export interface ChainScore {
   chainKey: ChainKey;
@@ -23,7 +23,8 @@ export function useChainScores(address: `0x${string}` | undefined): {
   const contracts = useMemo(
     () =>
       CHAIN_CONFIGS.map((chain) => ({
-        address: SURGE_SCORE_ADDRESS as `0x${string}`,
+        address: (SURGE_SCORE_ADDRESSES[chain.chainId] ??
+          SURGE_SCORE_ADDRESSES[84532]) as `0x${string}`,
         abi: surgeScoreAbi,
         functionName: "scoreOfAddress" as const,
         args: address ? ([address] as const) : ([] as unknown as readonly [`0x${string}`]),

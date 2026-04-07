@@ -3,12 +3,13 @@
 import { useMemo } from "react";
 import {
   useAccount,
+  useChainId,
   useReadContract,
   useReadContracts,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { SURGE_BADGE_ADDRESS, surgeBadgeAbi } from "@/lib/contracts";
+import { SURGE_BADGE_ADDRESSES, surgeBadgeAbi } from "@/lib/contracts";
 
 export interface OnChainBadgeType {
   id: number;
@@ -19,10 +20,13 @@ export interface OnChainBadgeType {
 
 export function useBadges() {
   const { address } = useAccount();
+  const chainId = useChainId();
+  const badgeAddress = (SURGE_BADGE_ADDRESSES[chainId] ??
+    SURGE_BADGE_ADDRESSES[84532]) as `0x${string}`;
 
   // Total number of badge types on the connected chain
   const { data: badgeCount } = useReadContract({
-    address: SURGE_BADGE_ADDRESS,
+    address: badgeAddress,
     abi: surgeBadgeAbi,
     functionName: "badgeCount",
   });
@@ -33,7 +37,7 @@ export function useBadges() {
   const typeContracts = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => ({
-        address: SURGE_BADGE_ADDRESS as `0x${string}`,
+        address: badgeAddress as `0x${string}`,
         abi: surgeBadgeAbi,
         functionName: "badgeTypes" as const,
         args: [BigInt(i + 1)] as const,
@@ -51,7 +55,7 @@ export function useBadges() {
     () =>
       address
         ? Array.from({ length: count }, (_, i) => ({
-            address: SURGE_BADGE_ADDRESS as `0x${string}`,
+            address: badgeAddress as `0x${string}`,
             abi: surgeBadgeAbi,
             functionName: "canClaim" as const,
             args: [address, BigInt(i + 1)] as const,
@@ -95,7 +99,7 @@ export function useBadges() {
 
   function claim(badgeId: number) {
     writeContract({
-      address: SURGE_BADGE_ADDRESS,
+      address: badgeAddress,
       abi: surgeBadgeAbi,
       functionName: "claim",
       args: [BigInt(badgeId)],
