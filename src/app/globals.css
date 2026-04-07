@@ -227,3 +227,32 @@ body {
   z-index: 0;
   will-change: transform, left, top;
 }
+
+/* ── Reduced Motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .tw-cursor {
+    animation: none;
+    opacity: 1;
+  }
+
+  .glitch-text::before,
+  .glitch-text::after {
+    display: none;
+  }
+
+  .animate-bob {
+    animation: none;
+  }
+
+  .flair-el {
+    display: none;
+  }
+}
