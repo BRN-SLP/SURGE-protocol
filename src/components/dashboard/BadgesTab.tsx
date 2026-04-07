@@ -368,9 +368,25 @@ export function BadgesTab({ badges, claimable, onClaim, isClaiming }: BadgesTabP
           gap: 8,
         }}
       >
-        {filtered.map((badge) => (
-          <BadgeCard key={badge.id} badge={badge} onClick={() => setSelected(badge)} />
-        ))}
+        {filtered.length === 0 ? (
+          <div
+            style={{
+              gridColumn: "1 / -1",
+              padding: "32px 0",
+              textAlign: "center",
+              color: "var(--text-faint)",
+              fontSize: "0.85rem",
+            }}
+          >
+            {badges.length === 0
+              ? "No badges earned yet — keep building on-chain reputation"
+              : "No badges in this category"}
+          </div>
+        ) : (
+          filtered.map((badge) => (
+            <BadgeCard key={badge.id} badge={badge} onClick={() => setSelected(badge)} />
+          ))
+        )}
       </div>
 
       {selected && <BadgeModal badge={selected} onClose={() => setSelected(null)} />}

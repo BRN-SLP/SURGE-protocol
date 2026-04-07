@@ -42,8 +42,17 @@ export default function IdentityPage() {
   const { address } = useAccount();
   const identityId = Number(tokenId ?? 0);
   const { wallets } = useWalletManagement(identityId);
-  const { activities, badges, quests, timeline, scoreHistory, domainBreakdown, mintedAt, loading } =
-    useDashboardData(tokenId, wallets.length);
+  const {
+    activities,
+    badges,
+    quests,
+    timeline,
+    scoreHistory,
+    domainBreakdown,
+    mintedAt,
+    loading,
+    error: dataError,
+  } = useDashboardData(tokenId, wallets.length);
   const { claimable, claim, isClaiming, isClaimed, refetchCanClaim } = useBadges();
   const { chainScores, totalScore } = useChainScores(address);
   const activeChainNames = chainScores.filter((c) => c.score > 0).map((c) => c.shortName);
@@ -111,6 +120,23 @@ export default function IdentityPage() {
             <SkeletonShimmer height={44} />
             <SkeletonShimmer height={44} />
             <SkeletonShimmer height={44} />
+          </div>
+        ) : dataError ? (
+          <div
+            style={{
+              padding: "24px 0",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}
+          >
+            <span style={{ fontSize: "0.75rem", color: "var(--accent)", letterSpacing: "0.08em" }}>
+              Failed to load data
+            </span>
+            <span style={{ fontSize: "0.8rem", color: "var(--text-faint)", fontWeight: 300 }}>
+              The Graph may be temporarily unavailable. Try refreshing.
+            </span>
           </div>
         ) : (
           <ErrorBoundary>

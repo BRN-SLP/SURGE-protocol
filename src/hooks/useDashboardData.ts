@@ -149,6 +149,7 @@ export function useDashboardData(tokenId?: bigint, walletCount = 1) {
   >([]);
   const [mintedAt, setMintedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!tokenId || tokenId === 0n) return;
@@ -301,7 +302,10 @@ export function useDashboardData(tokenId?: bigint, walletCount = 1) {
         setMintedAt(firstMintedAt);
         setQuests(computeQuests(allActivitiesRaw, walletCount));
       })
-      .catch(console.error)
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : "Failed to load dashboard data";
+        setError(msg);
+      })
       .finally(() => setLoading(false));
   }, [tokenId, walletCount]);
 
@@ -314,6 +318,7 @@ export function useDashboardData(tokenId?: bigint, walletCount = 1) {
     domainBreakdown,
     mintedAt,
     loading,
+    error,
   };
 }
 

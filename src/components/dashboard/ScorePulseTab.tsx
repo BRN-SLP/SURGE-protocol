@@ -52,7 +52,29 @@ function ScoreChart({ data, period }: { data: { date: string; score: number }[];
   const H = 120;
   const PAD = { top: 10, right: 10, bottom: 20, left: 10 };
 
-  if (filtered.length < 2) return null;
+  if (filtered.length < 2) {
+    return (
+      <div
+        style={{
+          height: 120,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: 6,
+          border: "1px dashed var(--border)",
+          borderRadius: "var(--radius-sm)",
+        }}
+      >
+        <span style={{ fontSize: "0.75rem", color: "var(--text-faint)" }}>
+          Score history will appear after the next oracle run
+        </span>
+        <span style={{ fontSize: "0.68rem", color: "var(--text-faint)", opacity: 0.6 }}>
+          ~every 6 hours
+        </span>
+      </div>
+    );
+  }
 
   const minScore = Math.min(...filtered.map((d) => d.score));
   const maxScore = Math.max(...filtered.map((d) => d.score));
