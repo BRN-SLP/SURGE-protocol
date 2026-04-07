@@ -49,7 +49,7 @@ function formatEventDate(dateStr: string) {
 
 function TimelineEventRow({
   event,
-  isFirst: _isFirst,
+  isFirst: _isFirst, // kept for potential future use (fade-in on first item)
   showYearMarker,
 }: {
   event: TimelineEvent;
