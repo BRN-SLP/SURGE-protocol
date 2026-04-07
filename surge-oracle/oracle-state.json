@@ -1,18 +1,19 @@
 {
   "lastProcessedBlock": {
-    "base": 39879003,
-    "op": 41861877,
-    "lisk": 35106651,
-    "zora": 38723146,
-    "ink": 46522998,
-    "mode": 43829183,
-    "world": 27489437,
-    "soneium": 26165981,
-    "unichain": 48673867
+    "base": 39888641,
+    "op": 41871516,
+    "lisk": 35116291,
+    "zora": 38732786,
+    "ink": 46542277,
+    "mode": 43838822,
+    "world": 27499076,
+    "soneium": 26175621,
+    "unichain": 48693148
   },
   "knownHolders": {
     "base": [
-      "0x91ea0eb3215b0c5b133b5f3382ec9afcf4a075dd"
+      "0x91ea0eb3215b0c5b133b5f3382ec9afcf4a075dd",
+      "0x559a9e268c416af13ab551b10fa3918d97be6e79"
     ],
     "op": [
       "0x559a9e268c416af13ab551b10fa3918d97be6e79",
@@ -26,5 +27,5 @@
     "soneium": [],
     "unichain": []
   },
-  "lastRunAt": "2026-04-07T01:44:59.195Z"
+  "lastRunAt": "2026-04-07T07:06:18.872Z"
 }
