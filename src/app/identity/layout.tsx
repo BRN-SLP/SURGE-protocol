@@ -3,7 +3,6 @@
 import { useSurgeIdentity } from "@/hooks/useSurgeIdentity";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { usePathname } from "next/navigation";
-import { SkeletonShimmer } from "@/components/ui/SkeletonShimmer";
 import { Hexagon } from "lucide-react";
 
 function GateScreen({
@@ -70,30 +69,8 @@ function GateScreen({
   );
 }
 
-function _LoadingScreen() {
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 16,
-        paddingTop: 64,
-      }}
-    >
-      <div style={{ width: 340, display: "flex", flexDirection: "column", gap: 12 }}>
-        <SkeletonShimmer height={320} borderRadius="var(--radius-sm)" />
-        <SkeletonShimmer height={44} />
-        <SkeletonShimmer height={200} />
-      </div>
-    </div>
-  );
-}
-
 export default function IdentityLayout({ children }: { children: React.ReactNode }) {
-  const { isConnected, hasIdentity, mint, isMinting, isMinted } = useSurgeIdentity();
+  const { isConnected, hasIdentity, mint, isMinting, isMinted, mintError } = useSurgeIdentity();
   const { openConnectModal } = useConnectModal();
   const pathname = usePathname();
 
@@ -138,26 +115,44 @@ export default function IdentityLayout({ children }: { children: React.ReactNode
         title="No Identity Found"
         subtitle="You don't have a SURGE Identity yet. Mint your soulbound identity NFT to start building your on-chain reputation."
         action={
-          <button
-            onClick={mint}
-            disabled={isMinting}
-            style={{
-              padding: "10px 28px",
-              background: isMinting ? "var(--surface-2)" : "var(--accent)",
-              color: isMinting ? "var(--text-muted)" : "#fff",
-              border: "none",
-              borderRadius: "var(--radius-sm)",
-              fontSize: "0.8rem",
-              fontFamily: "var(--font-display)",
-              fontWeight: 500,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              cursor: isMinting ? "not-allowed" : "pointer",
-              transition: "background 0.2s ease",
-            }}
-          >
-            {isMinting ? "Minting…" : "Initialize Identity"}
-          </button>
+          <>
+            <button
+              onClick={mint}
+              disabled={isMinting}
+              style={{
+                padding: "10px 28px",
+                background: isMinting ? "var(--surface-2)" : "var(--accent)",
+                color: isMinting ? "var(--text-muted)" : "#fff",
+                border: "none",
+                borderRadius: "var(--radius-sm)",
+                fontSize: "0.8rem",
+                fontFamily: "var(--font-display)",
+                fontWeight: 500,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                cursor: isMinting ? "not-allowed" : "pointer",
+                transition: "background 0.2s ease",
+              }}
+            >
+              {isMinting ? "Minting…" : "Initialize Identity"}
+            </button>
+            {mintError && (
+              <p
+                style={{
+                  margin: "8px 0 0",
+                  fontSize: "0.78rem",
+                  color: "var(--accent)",
+                  textAlign: "center",
+                  maxWidth: 320,
+                  fontWeight: 300,
+                }}
+              >
+                {mintError.includes("rejected") || mintError.includes("denied")
+                  ? "Transaction rejected."
+                  : "Mint failed — check you have Base Sepolia ETH and try again."}
+              </p>
+            )}
+          </>
         }
       />
     );

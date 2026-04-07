@@ -42,11 +42,20 @@ export function useSurgeIdentity() {
     query: { enabled: true },
   });
 
-  const { writeContract, data: mintTxHash, isPending: isMinting } = useWriteContract();
+  const {
+    writeContract,
+    data: mintTxHash,
+    isPending: isMinting,
+    error: mintWriteError,
+  } = useWriteContract();
 
-  const { isLoading: isConfirming, isSuccess: isMinted } = useWaitForTransactionReceipt({
-    hash: mintTxHash,
-  });
+  const {
+    isLoading: isConfirming,
+    isSuccess: isMinted,
+    error: mintReceiptError,
+  } = useWaitForTransactionReceipt({ hash: mintTxHash });
+
+  const mintError = mintWriteError?.message ?? mintReceiptError?.message ?? null;
 
   const mint = () => {
     writeContract({
@@ -66,6 +75,7 @@ export function useSurgeIdentity() {
     mint,
     isMinting: isMinting || isConfirming,
     isMinted,
+    mintError,
     refetchTokenId,
   };
 }
