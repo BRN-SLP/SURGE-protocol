@@ -1,25 +1,24 @@
+"use client";
 import { Navbar } from "@/components/layout/Navbar";
 import { DropsHub } from "@/components/sections/DropsHub";
 import { BorderVariantProvider } from "@/components/providers/BorderVariantProvider";
 import { ViewportContainer } from "@/components/layout/ViewportContainer";
 import { CompactHeader } from "@/components/layout/CompactHeader";
-
-export const metadata = {
-  title: "Drops",
-  description: "Claim your SURGE Protocol token drops. Live, upcoming, and ended distributions.",
-};
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export default function DropsPage() {
   return (
-    <BorderVariantProvider>
-      <Navbar />
-      <ViewportContainer style={{ display: "flex", flexDirection: "column" }}>
-        <CompactHeader
-          title="Drops Hub"
-          subtitle="Exclusive opportunities for SURGE Identity holders"
-        />
-        <DropsHub />
-      </ViewportContainer>
-    </BorderVariantProvider>
+    <ErrorBoundary>
+      <BorderVariantProvider>
+        <Navbar />
+        <ViewportContainer style={{ display: "flex", flexDirection: "column" }}>
+          <CompactHeader
+            title="Drops Hub"
+            subtitle="Exclusive opportunities for SURGE Identity holders"
+          />
+          <DropsHub />
+        </ViewportContainer>
+      </BorderVariantProvider>
+    </ErrorBoundary>
   );
 }

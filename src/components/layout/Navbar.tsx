@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useConnectModal, useAccountModal } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
+import { useState } from "react";
 
 const NAV_LINKS = [
   { label: "Identity", href: "/identity" },
@@ -82,8 +83,7 @@ function ConnectButton() {
 
 export function Navbar() {
   const pathname = usePathname();
-
-  const resolvedLinks = NAV_LINKS;
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const isActive = (href: string) => {
     if (href === "/identity") return pathname.startsWith("/identity");
@@ -91,66 +91,178 @@ export function Navbar() {
   };
 
   return (
-    <motion.header
-      className="fixed top-0 right-0 left-0 z-50"
-      style={{
-        background: "var(--bg)",
-        borderBottom: "1px solid var(--border)",
-      }}
-      initial={{ y: -64, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-    >
-      <div className="flex h-16 items-center justify-between px-[var(--section-px)]">
-        {/* Logo */}
-        <Link href="/" aria-label="SURGE Protocol home" className="flex items-center">
-          <span
-            className="glitch-text font-display text-2xl font-light tracking-[0.25em] uppercase"
-            data-text="SURGE"
-            style={{ color: "var(--text)" }}
-          >
-            SURGE
-          </span>
-        </Link>
+    <>
+      <motion.header
+        className="fixed top-0 right-0 left-0 z-50"
+        style={{
+          background: "var(--bg)",
+          borderBottom: "1px solid var(--border)",
+        }}
+        initial={{ y: -64, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="flex h-16 items-center justify-between px-[var(--section-px)]">
+          {/* Logo */}
+          <Link href="/" aria-label="SURGE Protocol home" className="flex items-center">
+            <span
+              className="glitch-text font-display text-2xl font-light tracking-[0.25em] uppercase"
+              data-text="SURGE"
+              style={{ color: "var(--text)" }}
+            >
+              SURGE
+            </span>
+          </Link>
 
-        {/* Nav links */}
-        <nav className="hidden h-full items-center gap-8 md:flex">
-          {resolvedLinks.map((link) => {
-            const active = isActive(link.href);
-            return (
-              <a
-                key={link.label}
-                href={link.href}
-                className="flex h-full items-center text-sm font-light tracking-tight uppercase transition-colors duration-0"
+          {/* Desktop nav links */}
+          <nav className="hidden h-full items-center gap-8 md:flex">
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className="flex h-full items-center text-sm font-light tracking-tight uppercase transition-colors duration-0"
+                  style={{
+                    color: active ? "var(--text)" : "rgba(245,245,245,0.5)",
+                    borderBottom: active ? "1px solid var(--accent)" : "1px solid transparent",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!active) {
+                      e.currentTarget.style.borderBottomColor = "var(--accent)";
+                      e.currentTarget.style.color = "var(--text)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!active) {
+                      e.currentTarget.style.borderBottomColor = "transparent";
+                      e.currentTarget.style.color = "rgba(245,245,245,0.5)";
+                    }
+                  }}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
+          </nav>
+
+          {/* Right controls */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <NotificationBell />
+            <ConnectButton />
+
+            {/* Hamburger — mobile only */}
+            <button
+              className="md:hidden"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((o) => !o)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "6px",
+                color: "var(--text-muted)",
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+              }}
+            >
+              <span
                 style={{
-                  color: active ? "var(--text)" : "rgba(245,245,245,0.5)",
-                  borderBottom: active ? "1px solid var(--accent)" : "1px solid transparent",
+                  display: "block",
+                  width: 18,
+                  height: 1.5,
+                  background: "currentColor",
+                  transition: "transform 0.2s, opacity 0.2s",
+                  transform: menuOpen ? "translateY(5.5px) rotate(45deg)" : "none",
                 }}
-                onMouseEnter={(e) => {
-                  if (!active) {
-                    e.currentTarget.style.borderBottomColor = "var(--accent)";
-                    e.currentTarget.style.color = "var(--text)";
-                  }
+              />
+              <span
+                style={{
+                  display: "block",
+                  width: 18,
+                  height: 1.5,
+                  background: "currentColor",
+                  transition: "opacity 0.2s",
+                  opacity: menuOpen ? 0 : 1,
                 }}
-                onMouseLeave={(e) => {
-                  if (!active) {
-                    e.currentTarget.style.borderBottomColor = "transparent";
-                    e.currentTarget.style.color = "rgba(245,245,245,0.5)";
-                  }
+              />
+              <span
+                style={{
+                  display: "block",
+                  width: 18,
+                  height: 1.5,
+                  background: "currentColor",
+                  transition: "transform 0.2s, opacity 0.2s",
+                  transform: menuOpen ? "translateY(-5.5px) rotate(-45deg)" : "none",
                 }}
-              >
-                {link.label}
-              </a>
-            );
-          })}
-        </nav>
-
-        {/* Right controls */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <NotificationBell />
-          <ConnectButton />
+              />
+            </button>
+          </div>
         </div>
-      </div>
-    </motion.header>
+      </motion.header>
+
+      {/* Mobile dropdown menu */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.nav
+            key="mobile-menu"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+            className="fixed right-0 left-0 z-40 md:hidden"
+            style={{
+              top: 64,
+              background: "var(--bg)",
+              borderBottom: "1px solid var(--border)",
+            }}
+          >
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    display: "block",
+                    padding: "14px var(--section-px)",
+                    fontSize: "0.85rem",
+                    fontWeight: 300,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: active ? "var(--text)" : "var(--text-muted)",
+                    borderLeft: active ? "2px solid var(--accent)" : "2px solid transparent",
+                    borderBottom: "1px solid var(--border)",
+                    transition: "color 0.15s",
+                  }}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
+          </motion.nav>
+        )}
+      </AnimatePresence>
+
+      {/* Backdrop */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMenuOpen(false)}
+            className="fixed inset-0 z-30 md:hidden"
+            style={{ background: "rgba(0,0,0,0.5)" }}
+          />
+        )}
+      </AnimatePresence>
+    </>
   );
 }
