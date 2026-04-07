@@ -116,7 +116,12 @@ export function useLinkWallet(identityId?: number) {
     }
   };
 
-  const reset = () => setState(INITIAL_STATE);
+  const reset = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("surge_link_identity_id");
+    }
+    setState(INITIAL_STATE);
+  };
 
   return {
     ...state,
