@@ -2,6 +2,7 @@
 
 import { useSurgeIdentity } from "@/hooks/useSurgeIdentity";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { usePathname } from "next/navigation";
 import { SkeletonShimmer } from "@/components/ui/SkeletonShimmer";
 import { Hexagon } from "lucide-react";
 
@@ -94,9 +95,13 @@ function _LoadingScreen() {
 export default function IdentityLayout({ children }: { children: React.ReactNode }) {
   const { isConnected, hasIdentity, mint, isMinting, isMinted } = useSurgeIdentity();
   const { openConnectModal } = useConnectModal();
+  const pathname = usePathname();
 
   // Still hydrating — don't flash gate
   if (typeof window === "undefined") return null;
+
+  // Link wallet flow allows any connected wallet (incl. Wallet B without identity)
+  if (pathname === "/identity/link") return <>{children}</>;
 
   if (!isConnected) {
     return (
