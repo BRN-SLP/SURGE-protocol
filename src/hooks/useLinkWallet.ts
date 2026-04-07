@@ -188,10 +188,19 @@ export function useLinkWallet(identityId?: bigint, currentWallet?: `0x${string}`
 
   const reset = () => setState(INITIAL_STATE);
 
+  // Step 1 → 2: user reviewed and understood
+  const [understood, setUnderstood] = useState(false);
+  const proceedToSign = () => {
+    if (understood) setState((s) => ({ ...s, step: 2, error: null }));
+  };
+
   const linkError = state.error ?? writeError?.message ?? receiptError?.message ?? null;
 
   return {
     ...state,
+    understood,
+    setUnderstood,
+    proceedToSign,
     deadline,
     setNewAddress,
     signFromCurrent,

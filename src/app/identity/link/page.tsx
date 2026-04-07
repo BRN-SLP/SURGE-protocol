@@ -640,15 +640,19 @@ export default function LinkWalletPage() {
   })();
 
   const { wallets } = useWalletManagement(identityId);
-  const { step, isLoading, error, newAddress, signFromCurrent, signFromNew, reset } = useLinkWallet(
-    identityId,
-    address ?? undefined,
-  );
-  // compat shims for old UI fields
-  const understood = true;
-  const nonce = 0;
-  const setUnderstood = (_: boolean) => {};
-  const proceedToSign = () => {};
+  const {
+    step,
+    understood,
+    isLoading,
+    error,
+    newAddress,
+    setUnderstood,
+    proceedToSign,
+    signFromCurrent,
+    signFromNew,
+    reset,
+  } = useLinkWallet(identityId, address ?? undefined);
+  const nonce = 0; // legacy prop for Step2Sign display only
 
   const currentAddress = address ?? "";
   const currentScore = Number(score);
