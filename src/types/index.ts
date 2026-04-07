@@ -75,11 +75,11 @@ export interface IdentityCardData {
   walletCount: number;
   chainCount: number;
   badgeCount: number;
-  streakDays: number;
-  memberSince: string; // e.g. "Jan 2024"
-  defiPct: number; // 0–100
-  builderPct: number;
-  govPct: number;
+  streakDays?: number;
+  memberSince?: string; // e.g. "Jan 2024"
+  defiPct?: number; // 0–100
+  builderPct?: number;
+  govPct?: number;
 }
 
 export interface WalletScore {
@@ -101,4 +101,116 @@ export interface CombinedScore {
   combinedScore: number;
   tier: Tier;
   nextTier: { tier: Tier; ptsNeeded: number } | null;
+}
+
+// ── Wallet Management ────────────────────────────────────────
+
+export type WalletRole = "primary" | "security" | "regular";
+export type WalletStatus = "active" | "frozen" | "compromised" | "pending";
+
+export interface WalletInfo {
+  address: string;
+  role: WalletRole;
+  status: WalletStatus;
+  score: number;
+  txCount: number;
+  chains: string[]; // e.g. ["Ethereum", "Base", "OP"]
+  linkedSince: string; // e.g. "Jan 2024"
+  isCurrentWallet?: boolean;
+}
+
+// ── Badges ───────────────────────────────────────────────────
+
+export type BadgeCategory = "official" | "partner" | "heritage" | "seasonal";
+export type BadgeRarity = "common" | "rare" | "epic" | "legendary";
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  category: BadgeCategory;
+  rarity: BadgeRarity;
+  earnedAt?: string; // ISO date string, undefined = not earned
+  progress?: number; // 0–100, for in-progress badges
+  maxProgress?: number;
+  icon: string; // emoji or icon identifier
+}
+
+// ── Quests ───────────────────────────────────────────────────
+
+export type QuestStatus = "active" | "completed" | "locked";
+
+export interface QuestInfo {
+  id: string;
+  title: string;
+  description: string;
+  progress: number;
+  maxProgress: number;
+  reward: number; // score points
+  status: QuestStatus;
+  category: string;
+}
+
+// ── Activity Feed ────────────────────────────────────────────
+
+export type ActivityType =
+  | "score_change"
+  | "badge_earned"
+  | "wallet_linked"
+  | "quest_completed"
+  | "drop_claimed"
+  | "governance"
+  | "defi"
+  | "builder";
+
+export interface ActivityEvent {
+  id: string;
+  type: ActivityType;
+  delta: number; // positive or negative score change
+  description: string;
+  chain: string;
+  timestamp: string; // ISO date string
+}
+
+// ── Timeline ─────────────────────────────────────────────────
+
+export type TimelineEventType =
+  | "milestone"
+  | "score_change"
+  | "badge_earned"
+  | "wallet_event"
+  | "quest_completed";
+
+export interface TimelineEvent {
+  id: string;
+  type: TimelineEventType;
+  title: string;
+  description: string;
+  date: string; // ISO date string
+  scoreDelta?: number;
+  chain?: string;
+}
+
+// ── Score Simulator ──────────────────────────────────────────
+
+export interface SimulatorAction {
+  id: string;
+  title: string;
+  description: string;
+  scoreDelta: number;
+  category: string;
+  enabled: boolean;
+}
+
+// ── Verification ─────────────────────────────────────────────
+
+export type VerifyStatus = "found" | "not_found" | "invalid" | "loading" | "idle";
+
+export interface VerifyResult {
+  status: VerifyStatus;
+  identity?: IdentityCardData & {
+    address: string;
+    walletCount: number;
+    chainCount: number;
+  };
 }

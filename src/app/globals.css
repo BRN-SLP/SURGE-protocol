@@ -13,7 +13,7 @@
   --surface-2: #353534;
   --text: #f5f5f5;
   --text-muted: #aaaaaa;
-  --text-faint: #444444;
+  --text-faint: #555555;
   --border: #2a2a2a;
   --border-hover: #3a3a3a;
   --accent: #dc3333;
@@ -36,10 +36,23 @@
   --success: #18884d;
 }
 
+/* ── Spacing & radius tokens ────────────────────────────── */
+:root {
+  --radius-sm: 10px;
+  --radius-md: 10px;
+  --radius-lg: 10px;
+  --section-px: clamp(1.5rem, 5vw, 5rem);
+  --section-py: clamp(4rem, 8vw, 8rem);
+  --block-gap: clamp(1rem, 2.5vw, 2rem);
+  --navbar-h: 64px;
+  --viewport-content: calc(100dvh - var(--navbar-h));
+}
+
 /* ── Base ───────────────────────────────────────────────── */
 html {
   background-color: var(--bg);
   color: var(--text);
+  scroll-behavior: smooth;
 }
 
 body {
@@ -71,4 +84,146 @@ body {
 ::selection {
   background-color: rgba(220, 51, 51, 0.2);
   color: var(--text);
+}
+
+/* ── T3 Typewriter cursor ───────────────────────────────── */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.tw-cursor {
+  animation: blink 0.75s step-end infinite;
+}
+
+/* ── T6 Glitch ──────────────────────────────────────────── */
+@keyframes glitch-1 {
+  0%,
+  90%,
+  100% {
+    clip-path: none;
+    transform: none;
+  }
+  92% {
+    clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+    transform: translateX(-4px);
+  }
+  94% {
+    clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+    transform: translateX(4px);
+  }
+  96% {
+    clip-path: polygon(0 10%, 100% 10%, 100% 25%, 0 25%);
+    transform: translateX(-2px);
+  }
+}
+
+.glitch-text {
+  position: relative;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch-text::before {
+  color: var(--accent);
+  animation: glitch-1 4s infinite;
+}
+
+.glitch-text::after {
+  color: #3399ff;
+  animation: glitch-1 4s infinite 0.1s reverse;
+  opacity: 0.5;
+}
+
+/* ── Animate Bob (L1 identity card) ────────────────────── */
+@keyframes depth-tilt {
+  0% {
+    transform: perspective(900px) rotateX(3deg) rotateY(-4deg) translateZ(0px);
+  }
+  25% {
+    transform: perspective(900px) rotateX(-2deg) rotateY(3deg) translateZ(10px);
+  }
+  50% {
+    transform: perspective(900px) rotateX(4deg) rotateY(2deg) translateZ(6px);
+  }
+  75% {
+    transform: perspective(900px) rotateX(-1deg) rotateY(-3deg) translateZ(12px);
+  }
+  100% {
+    transform: perspective(900px) rotateX(3deg) rotateY(-4deg) translateZ(0px);
+  }
+}
+
+.animate-bob {
+  animation: depth-tilt 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ── Skeleton shimmer ───────────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ── HIW card number glitch ─────────────────────────────── */
+@keyframes hiw-num-glitch {
+  0% {
+    transform: none;
+    opacity: 1;
+  }
+  15% {
+    transform: translate(-4px, 0) skewX(-4deg);
+    opacity: 0.7;
+  }
+  30% {
+    transform: translate(4px, 0) skewX(2deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-2px, 1px);
+    opacity: 0.8;
+  }
+  65% {
+    transform: translate(2px, -1px) skewX(-1deg);
+    opacity: 1;
+  }
+  80% {
+    transform: translate(-1px, 0);
+    opacity: 0.9;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+.hiw-glitch {
+  animation: hiw-num-glitch 0.4s steps(2) forwards;
+}
+
+/* ── FL1 Flair ──────────────────────────────────────────── */
+.flair-el {
+  position: absolute;
+  width: 200%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform, left, top;
 }

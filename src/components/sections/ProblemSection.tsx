@@ -1,142 +1,174 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
-
-function PhishedIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-full w-full" aria-hidden="true">
-      <path d="M12 3v7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path
-        d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M14 12c0 1.1-.9 2-2 2v5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path d="M10 19h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M9 3h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path
-        d="M15 3c0 1.66-1.34 3-3 3S9 4.66 9 3"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function LeakedSeedIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-full w-full" aria-hidden="true">
-      <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M8 11V7a4 4 0 0 1 8 0"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <circle cx="12" cy="16" r="1.5" fill="currentColor" />
-      <path d="M12 17.5v1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function MaliciousAppIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-full w-full" aria-hidden="true">
-      <path
-        d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <path d="M12 9v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="12" cy="17" r="1" fill="currentColor" />
-    </svg>
-  );
-}
+import { useEffect, useRef } from "react";
+import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 const PROBLEMS = [
   {
-    Icon: PhishedIcon,
+    id: "problem-1" as const,
+    icon: "key",
     title: "Phished Key",
     description:
-      "Systemic vulnerability in legacy asymmetric encryption allows for single-point authentication failure via sophisticated social engineering vectors.",
+      "Traditional EOA wallets rely on a single point of failure. One phishing link, one compromised device — and your entire on-chain history is gone forever.",
   },
   {
-    Icon: LeakedSeedIcon,
+    id: "problem-2" as const,
+    icon: "password",
     title: "Leaked Seed",
     description:
-      "Irrevocable asset exposure resulting from physical or digital discovery of mnemonic phrases. Once compromised, the root of trust is permanently severed.",
+      "Storing 12 words on paper or in digital notes creates irrevocable exposure. Once your seed phrase is discovered, your root of trust is permanently severed.",
   },
   {
-    Icon: MaliciousAppIcon,
+    id: "problem-3" as const,
+    icon: "terminal",
     title: "Malicious App",
     description:
-      "Shadow-execution of smart contract permissions that bypass standard user UI, leading to automated and unauthorized wallet draining sequences.",
+      "Blind-signing transactions on unverified dApps grants unlimited permissions. Shadow-execution drains wallets silently, bypassing every standard UI safeguard.",
   },
 ];
 
-export function ProblemSection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.2 });
+function ProblemCard({ problem, index }: { problem: (typeof PROBLEMS)[number]; index: number }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+
+    const onEnter = () => {
+      if (iconRef.current) iconRef.current.style.color = "var(--accent)";
+      gsap.to(card, {
+        y: -4,
+        boxShadow: "0 12px 32px rgba(0,0,0,0.45)",
+        duration: 0.25,
+        ease: "power2.out",
+      });
+    };
+
+    const onLeave = () => {
+      if (iconRef.current) iconRef.current.style.color = "var(--text-muted)";
+      gsap.to(card, {
+        y: 0,
+        boxShadow: "0 0px 0px rgba(0,0,0,0)",
+        duration: 0.4,
+        ease: "power2.out",
+      });
+    };
+
+    card.addEventListener("mouseenter", onEnter);
+    card.addEventListener("mouseleave", onLeave);
+
+    return () => {
+      card.removeEventListener("mouseenter", onEnter);
+      card.removeEventListener("mouseleave", onLeave);
+      gsap.killTweensOf(card);
+    };
+  }, []);
 
   return (
-    <section ref={ref} className="px-6 py-28" style={{ borderTop: "1px solid var(--border)" }}>
-      <div className="mx-auto max-w-7xl">
-        <motion.div
-          className="mb-20 text-center"
-          initial={{ opacity: 0, y: 24 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="text-[40px] font-light tracking-tight" style={{ color: "var(--text)" }}>
-            The Problem No One Solved
-          </h2>
-        </motion.div>
+    <div
+      ref={cardRef}
+      className="card-item relative p-6"
+      data-index={index}
+      style={{
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius-md)",
+      }}
+    >
+      <span
+        ref={iconRef}
+        className="material-symbols-outlined mb-4 block transition-colors duration-150"
+        style={{ fontSize: "36px", color: "var(--text-muted)" }}
+        aria-hidden="true"
+      >
+        {problem.icon}
+      </span>
+      <h3
+        className="mb-3 text-[16px] font-light tracking-wide uppercase"
+        style={{ color: "var(--text)" }}
+      >
+        {problem.title}
+      </h3>
+      <p className="text-[14px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+        {problem.description}
+      </p>
+    </div>
+  );
+}
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+export function ProblemSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    registerGsap();
+
+    const ctx = gsap.context(() => {
+      const heading = sectionRef.current?.querySelector(".section-heading");
+      const cards = sectionRef.current?.querySelectorAll(".card-item");
+
+      if (heading) {
+        gsap.from(heading, {
+          opacity: 0,
+          y: 24,
+          duration: 0.6,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: heading,
+            start: "top 85%",
+          },
+        });
+      }
+
+      if (cards) {
+        gsap.fromTo(
+          cards,
+          { opacity: 0, scale: 1.08, filter: "blur(8px)" },
+          {
+            opacity: 1,
+            scale: 1,
+            filter: "blur(0px)",
+            duration: 0.6,
+            ease: "power2.out",
+            stagger: 0.12,
+            clearProps: "filter,scale",
+            scrollTrigger: { trigger: cards[0], start: "top 80%" },
+          },
+        );
+      }
+    }, sectionRef);
+
+    return () => {
+      ctx.revert();
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+    };
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      style={{
+        paddingLeft: "var(--section-px)",
+        paddingRight: "var(--section-px)",
+        paddingTop: "clamp(2.5rem, 5vw, 4rem)",
+        paddingBottom: "clamp(2.5rem, 5vw, 4rem)",
+      }}
+    >
+      <div className="mx-auto max-w-7xl">
+        <div className="section-heading mb-10 text-center">
+          <p
+            className="mb-3 text-[0.7rem] tracking-[0.22em] uppercase"
+            style={{ color: "var(--text-muted)" }}
+          >
+            The Problem
+          </p>
+          <h2 className="text-[40px] font-light tracking-tight" style={{ color: "var(--text)" }}>
+            One Compromise. <span style={{ color: "var(--accent)" }}>Everything</span> Gone.
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 gap-[var(--block-gap)] md:grid-cols-3">
           {PROBLEMS.map((problem, i) => (
-            <motion.div
-              key={problem.title}
-              className="group p-10"
-              style={{ border: "1px solid var(--border)" }}
-              initial={{ opacity: 0, y: 24 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: i * 0.12 }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = "var(--border-hover)";
-                const icon = e.currentTarget.querySelector(".card-icon") as HTMLElement;
-                if (icon) icon.style.color = "var(--accent)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = "var(--border)";
-                const icon = e.currentTarget.querySelector(".card-icon") as HTMLElement;
-                if (icon) icon.style.color = "var(--text-muted)";
-              }}
-            >
-              <div
-                className="card-icon mb-8 h-12 w-12 transition-colors duration-150"
-                style={{ color: "var(--text-muted)" }}
-              >
-                <problem.Icon />
-              </div>
-              <h3
-                className="mb-4 text-[20px] font-light tracking-wide uppercase"
-                style={{ color: "var(--text)" }}
-              >
-                {problem.title}
-              </h3>
-              <p className="text-[14px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                {problem.description}
-              </p>
-            </motion.div>
+            <ProblemCard key={problem.id} problem={problem} index={i} />
           ))}
         </div>
       </div>

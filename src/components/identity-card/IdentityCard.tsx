@@ -1,7 +1,9 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { gsap } from "@/lib/gsap";
+import { Hexagon } from "lucide-react";
 import { type IdentityCardData, TIERS } from "@/types";
 
 interface IdentityCardProps {
@@ -17,51 +19,56 @@ function shortHash(id: number): string {
 
 export function IdentityCard({ data, interactive = true }: IdentityCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
 
   const tier = TIERS[data.tier];
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!interactive || !cardRef.current) return;
-      const rect = cardRef.current.getBoundingClientRect();
-      const x = ((e.clientY - rect.top) / rect.height - 0.5) * -10;
-      const y = ((e.clientX - rect.left) / rect.width - 0.5) * 10;
-      setTilt({ x, y });
-    },
-    [interactive],
-  );
+  useEffect(() => {
+    if (!interactive) return;
+    const card = cardRef.current;
+    if (!card) return;
 
-  const handleMouseLeave = useCallback(() => {
-    setTilt({ x: 0, y: 0 });
-    setIsHovered(false);
-  }, []);
+    const onMove = (e: MouseEvent) => {
+      const r = card.getBoundingClientRect();
+      const rx = ((e.clientY - r.top) / r.height - 0.5) * -20;
+      const ry = ((e.clientX - r.left) / r.width - 0.5) * 20;
+      gsap.to(card, {
+        rotateX: rx,
+        rotateY: ry,
+        transformPerspective: 800,
+        duration: 0.3,
+        ease: "power2.out",
+      });
+    };
 
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
-  }, []);
+    const onLeave = () => {
+      gsap.to(card, { rotateX: 0, rotateY: 0, duration: 0.6, ease: "elastic.out(1, 0.4)" });
+    };
 
-  const metrics = [
-    { label: "Sybil Resistance", value: data.defiPct },
-    { label: "Network Trust", value: data.builderPct },
-    { label: "Activity Depth", value: data.govPct },
-  ];
+    card.addEventListener("mousemove", onMove);
+    card.addEventListener("mouseleave", onLeave);
+
+    return () => {
+      card.removeEventListener("mousemove", onMove);
+      card.removeEventListener("mouseleave", onLeave);
+      gsap.killTweensOf(card);
+    };
+  }, [interactive]);
+
+  const hasMetrics =
+    data.defiPct !== undefined || data.builderPct !== undefined || data.govPct !== undefined;
+  const metrics = hasMetrics
+    ? [
+        { label: "Sybil Resistance", value: data.defiPct ?? 0 },
+        { label: "Network Trust", value: data.builderPct ?? 0 },
+        { label: "Activity Depth", value: data.govPct ?? 0 },
+      ]
+    : [];
 
   return (
-    <motion.div
+    <div
       ref={cardRef}
       className="relative cursor-default select-none"
-      style={{ width: 340, perspective: 1000 }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onMouseEnter={handleMouseEnter}
-      animate={{
-        rotateX: tilt.x,
-        rotateY: tilt.y,
-        scale: isHovered ? 1.02 : 1,
-      }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      style={{ width: 280, transformStyle: "preserve-3d" }}
     >
       {/* Spinning border wrapper */}
       <div className="relative overflow-hidden" style={{ borderRadius: 16, padding: 1 }}>
@@ -86,7 +93,7 @@ export function IdentityCard({ data, interactive = true }: IdentityCardProps) {
           style={{
             borderRadius: 15,
             background: "#141414",
-            padding: 28,
+            padding: 20,
             zIndex: 1,
           }}
         >
@@ -146,10 +153,10 @@ export function IdentityCard({ data, interactive = true }: IdentityCardProps) {
             className="relative"
             style={{
               textAlign: "center",
-              padding: "20px 0",
+              padding: "14px 0",
               borderTop: "1px solid #2a2a2a",
               borderBottom: "1px solid #2a2a2a",
-              marginBottom: 20,
+              marginBottom: 16,
             }}
           >
             <div
@@ -165,7 +172,7 @@ export function IdentityCard({ data, interactive = true }: IdentityCardProps) {
             </div>
             <div
               style={{
-                fontSize: 58,
+                fontSize: 46,
                 fontWeight: 300,
                 color: "#f5f5f5",
                 lineHeight: 1,
@@ -187,55 +194,57 @@ export function IdentityCard({ data, interactive = true }: IdentityCardProps) {
           </div>
 
           {/* Metrics */}
-          <div
-            className="relative"
-            style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 20 }}
-          >
-            {metrics.map((metric) => (
-              <div key={metric.label}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 6,
-                  }}
-                >
-                  <span
+          {hasMetrics && (
+            <div
+              className="relative"
+              style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}
+            >
+              {metrics.map((metric) => (
+                <div key={metric.label}>
+                  <div
                     style={{
-                      fontSize: 10,
-                      color: "#aaaaaa",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.1em",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: 6,
                     }}
                   >
-                    {metric.label}
-                  </span>
-                  <span style={{ fontSize: 10, color: "#f5f5f5" }}>{metric.value}%</span>
-                </div>
-                <div
-                  style={{
-                    height: 1,
-                    background: "#2a2a2a",
-                    overflow: "hidden",
-                  }}
-                >
-                  <motion.div
+                    <span
+                      style={{
+                        fontSize: 10,
+                        color: "#aaaaaa",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                      }}
+                    >
+                      {metric.label}
+                    </span>
+                    <span style={{ fontSize: 10, color: "#f5f5f5" }}>{metric.value}%</span>
+                  </div>
+                  <div
                     style={{
-                      height: "100%",
-                      background: "linear-gradient(90deg, #ca5454, #e07070)",
+                      height: 1,
+                      background: "#2a2a2a",
+                      overflow: "hidden",
                     }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${metric.value}%` }}
-                    transition={{
-                      duration: 1.2,
-                      ease: [0.4, 0, 0.2, 1],
-                      delay: 0.3,
-                    }}
-                  />
+                  >
+                    <motion.div
+                      style={{
+                        height: "100%",
+                        background: "linear-gradient(90deg, #ca5454, #e07070)",
+                      }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${metric.value}%` }}
+                      transition={{
+                        duration: 1.2,
+                        ease: [0.4, 0, 0.2, 1],
+                        delay: 0.3,
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* Footer */}
           <div
@@ -278,11 +287,16 @@ export function IdentityCard({ data, interactive = true }: IdentityCardProps) {
                 letterSpacing: "0.12em",
               }}
             >
-              ⬡ Superchain
+              <Hexagon
+                size={9}
+                strokeWidth={1.25}
+                style={{ marginRight: 4, verticalAlign: "middle", display: "inline" }}
+              />
+              Superchain
             </div>
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

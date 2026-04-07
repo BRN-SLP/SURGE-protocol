@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { Check } from "lucide-react";
 import { viewportOnce } from "@/lib/motion";
 
 export function FinalCTA() {
@@ -36,16 +37,22 @@ export function FinalCTA() {
   };
 
   return (
-    <section className="px-6 py-28" style={{ borderTop: "1px solid var(--border)" }}>
+    <section
+      style={{
+        paddingLeft: "var(--section-px)",
+        paddingRight: "var(--section-px)",
+        paddingTop: "clamp(2.5rem, 5vw, 4rem)",
+        paddingBottom: "clamp(2.5rem, 5vw, 4rem)",
+      }}
+    >
       <div className="mx-auto max-w-3xl text-center">
         <motion.div
-          className="flex flex-col gap-7"
+          className="flex flex-col gap-4"
           initial={reducedMotion ? {} : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={viewportOnce}
           transition={{ duration: 0.6 }}
         >
-          {/* Label */}
           <p
             className="text-xs font-light tracking-[0.2em] uppercase"
             style={{ color: "var(--accent)" }}
@@ -53,15 +60,13 @@ export function FinalCTA() {
             Early Access
           </p>
 
-          {/* Headline */}
           <h2
-            className="font-display text-4xl leading-tight font-light lg:text-5xl"
+            className="font-display text-3xl leading-tight font-light lg:text-4xl"
             style={{ color: "var(--text)" }}
           >
             Be first when <span style={{ color: "var(--accent)" }}>SURGE goes live</span>
           </h2>
 
-          {/* Sub-copy */}
           <p
             className="mx-auto max-w-xl text-lg leading-relaxed"
             style={{ color: "var(--text-muted)" }}
@@ -70,7 +75,6 @@ export function FinalCTA() {
             score — locked at your join position, forever.
           </p>
 
-          {/* Perks */}
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-3">
             {[
               "Founding member badge",
@@ -83,15 +87,12 @@ export function FinalCTA() {
                 className="flex items-center gap-2 text-sm"
                 style={{ color: "var(--text-muted)" }}
               >
-                <span style={{ color: "var(--success)" }} aria-hidden="true">
-                  ✓
-                </span>
+                <Check size={13} color="var(--success)" strokeWidth={1.25} aria-hidden="true" />
                 {perk}
               </div>
             ))}
           </div>
 
-          {/* Form / Success */}
           <AnimatePresence mode="wait">
             {submitted ? (
               <motion.div
@@ -101,9 +102,10 @@ export function FinalCTA() {
                 className="flex flex-col items-center gap-3 py-5"
               >
                 <div
-                  className="flex h-10 w-10 items-center justify-center rounded"
+                  className="flex h-10 w-10 items-center justify-center"
                   style={{
                     border: "1px solid var(--border)",
+                    borderRadius: "var(--radius-sm)",
                     color: "var(--success)",
                   }}
                 >
@@ -117,7 +119,7 @@ export function FinalCTA() {
                     />
                   </svg>
                 </div>
-                <p className="font-display text-lg font-bold" style={{ color: "var(--text)" }}>
+                <p className="font-display text-lg font-light" style={{ color: "var(--text)" }}>
                   You&apos;re on the list
                 </p>
                 <p className="text-sm" style={{ color: "var(--text-muted)" }}>
@@ -131,7 +133,7 @@ export function FinalCTA() {
                 className="mx-auto flex w-full max-w-md flex-col gap-3 sm:flex-row"
                 noValidate
               >
-                <div className="flex flex-1 flex-col gap-1.5">
+                <div className="relative flex flex-1 flex-col gap-1.5">
                   <input
                     type="email"
                     value={email}
@@ -140,11 +142,13 @@ export function FinalCTA() {
                       if (error) setError(null);
                     }}
                     placeholder="your@email.com"
-                    className="w-full px-4 py-3 text-sm transition-colors duration-150 focus:outline-none"
+                    className="w-full px-4 py-3 text-sm focus:outline-none"
                     style={{
-                      background: "var(--surface-2)",
+                      background: "transparent",
                       border: "1px solid var(--border)",
+                      borderRadius: "var(--radius-sm)",
                       color: "var(--text)",
+                      transition: "border-color 0.2s",
                     }}
                     onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
                     onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
@@ -173,12 +177,19 @@ export function FinalCTA() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="shrink-0 px-6 py-3 text-sm font-light text-white transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                  style={{ background: "var(--accent)" }}
-                  onMouseEnter={(e) =>
-                    !loading && (e.currentTarget.style.background = "var(--accent-hover)")
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
+                  className="shrink-0 px-6 py-3 text-sm font-light focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                  style={{
+                    background: "var(--surface-2)",
+                    color: "var(--text)",
+                    borderRadius: "var(--radius-sm)",
+                    border: "1px solid var(--border)",
+                    transition: "border-color 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!e.currentTarget.disabled)
+                      e.currentTarget.style.borderColor = "var(--accent)";
+                  }}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
                 >
                   {loading ? "Sending…" : "Get Early Access"}
                 </button>

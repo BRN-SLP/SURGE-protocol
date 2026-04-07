@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Roboto_Condensed } from "next/font/google";
 import { PostHogProvider } from "@/components/providers/PostHogProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { Web3Provider } from "@/components/providers/Web3Provider";
 import "./globals.css";
 
 const robotoCondensed = Roboto_Condensed({
@@ -39,9 +40,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={robotoCondensed.variable} suppressHydrationWarning>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&icon_names=key,password,terminal"
+        />
+      </head>
       <body className="flex min-h-screen flex-col">
         <ThemeProvider>
-          <PostHogProvider>{children}</PostHogProvider>
+          <Web3Provider>
+            <PostHogProvider>{children}</PostHogProvider>
+          </Web3Provider>
         </ThemeProvider>
       </body>
     </html>
