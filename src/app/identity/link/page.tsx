@@ -624,7 +624,21 @@ function Step4Confirm({
 
 export default function LinkWalletPage() {
   const { tokenId, score, address } = useSurgeIdentity();
-  const identityId = Number(tokenId ?? 0);
+  const liveIdentityId = Number(tokenId ?? 0);
+
+  // Freeze the identity ID for the duration of the flow so that switching
+  // to Wallet B (no identity) doesn't reset it to 0.
+  // The dashboard stores it in sessionStorage before navigating here.
+  const identityId = (() => {
+    if (typeof window === "undefined") return liveIdentityId;
+    if (liveIdentityId > 0) {
+      sessionStorage.setItem("surge_link_identity_id", String(liveIdentityId));
+      return liveIdentityId;
+    }
+    const stored = sessionStorage.getItem("surge_link_identity_id");
+    return stored ? Number(stored) : 0;
+  })();
+
   const { wallets } = useWalletManagement(identityId);
   const {
     step,
