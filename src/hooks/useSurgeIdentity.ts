@@ -1,45 +1,70 @@
 "use client";
 
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { baseSepolia } from "wagmi/chains";
 import {
-  SURGE_IDENTITY_ADDRESS,
-  SURGE_SCORE_ADDRESS,
+  useAccount,
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useChainId,
+} from "wagmi";
+import {
+  SURGE_IDENTITY_ADDRESSES,
+  SURGE_SCORE_ADDRESSES,
   surgeIdentityAbi,
   surgeScoreAbi,
 } from "@/lib/contracts";
 
 export function useSurgeIdentity() {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
 
-  // Identity lookup always targets Base Sepolia — canonical chain for identity NFT.
-  const { data: tokenId, refetch: refetchTokenId } = useReadContract({
-    address: SURGE_IDENTITY_ADDRESS,
+  const identityAddress = SURGE_IDENTITY_ADDRESSES[chainId];
+  const scoreAddress = SURGE_SCORE_ADDRESSES[chainId];
+
+  const { data: identityId, refetch: refetchIdentityId } = useReadContract({
+    address: identityAddress,
     abi: surgeIdentityAbi,
     functionName: "identityOf",
     args: address ? [address] : undefined,
-    chainId: baseSepolia.id,
-    query: { enabled: !!address },
+    chainId,
+    query: { enabled: !!address && !!identityAddress },
   });
 
-  const hasIdentity = tokenId !== undefined && tokenId > 0n;
+  const hasIdentity = identityId !== undefined && identityId > 0n;
 
-  // Base Sepolia score — single-chain. Use useChainScores for cross-chain total.
   const { data: score } = useReadContract({
-    address: SURGE_SCORE_ADDRESS,
+    address: scoreAddress,
     abi: surgeScoreAbi,
     functionName: "scoreOfAddress",
     args: address ? [address] : undefined,
-    chainId: baseSepolia.id,
-    query: { enabled: !!address && hasIdentity },
+    chainId,
+    query: { enabled: !!address && hasIdentity && !!scoreAddress },
   });
 
-  const { data: totalSupply } = useReadContract({
-    address: SURGE_IDENTITY_ADDRESS,
+  const { data: totalIdentities } = useReadContract({
+    address: identityAddress,
     abi: surgeIdentityAbi,
-    functionName: "totalSupply",
-    chainId: baseSepolia.id,
-    query: { enabled: true },
+    functionName: "totalIdentities",
+    chainId,
+    query: { enabled: !!identityAddress },
+  });
+
+  const { data: primaryWallet } = useReadContract({
+    address: identityAddress,
+    abi: surgeIdentityAbi,
+    functionName: "primaryWallet",
+    args: identityId ? [identityId] : undefined,
+    chainId,
+    query: { enabled: hasIdentity && !!identityAddress },
+  });
+
+  const { data: walletStatus } = useReadContract({
+    address: identityAddress,
+    abi: surgeIdentityAbi,
+    functionName: "walletStatus",
+    args: address ? [address] : undefined,
+    chainId,
+    query: { enabled: !!address && hasIdentity && !!identityAddress },
   });
 
   const {
@@ -58,8 +83,9 @@ export function useSurgeIdentity() {
   const mintError = mintWriteError?.message ?? mintReceiptError?.message ?? null;
 
   const mint = () => {
+    if (!identityAddress) return;
     writeContract({
-      address: SURGE_IDENTITY_ADDRESS,
+      address: identityAddress,
       abi: surgeIdentityAbi,
       functionName: "mint",
     });
@@ -68,14 +94,22 @@ export function useSurgeIdentity() {
   return {
     isConnected,
     address,
-    tokenId,
+    chainId,
+    identityId,
+    // backwards-compat alias
+    tokenId: identityId,
     hasIdentity,
     score: score ?? 0n,
-    totalSupply: totalSupply ?? 0n,
+    totalIdentities: totalIdentities ?? 0n,
+    // backwards-compat alias
+    totalSupply: totalIdentities ?? 0n,
+    primaryWallet,
+    walletStatus,
     mint,
     isMinting: isMinting || isConfirming,
     isMinted,
     mintError,
-    refetchTokenId,
+    refetchTokenId: refetchIdentityId,
+    refetchIdentityId,
   };
 }

@@ -624,35 +624,31 @@ function Step4Confirm({
 
 export default function LinkWalletPage() {
   const { tokenId, score, address } = useSurgeIdentity();
-  const liveIdentityId = Number(tokenId ?? 0);
+  const liveIdentityId = tokenId ?? 0n;
 
   // Freeze the identity ID for the duration of the flow so that switching
   // to Wallet B (no identity) doesn't reset it to 0.
   // The dashboard stores it in sessionStorage before navigating here.
   const identityId = (() => {
     if (typeof window === "undefined") return liveIdentityId;
-    if (liveIdentityId > 0) {
+    if (liveIdentityId > 0n) {
       sessionStorage.setItem("surge_link_identity_id", String(liveIdentityId));
       return liveIdentityId;
     }
     const stored = sessionStorage.getItem("surge_link_identity_id");
-    return stored ? Number(stored) : 0;
+    return stored ? BigInt(stored) : 0n;
   })();
 
   const { wallets } = useWalletManagement(identityId);
-  const {
-    step,
-    understood,
-    isLoading,
-    error,
-    newAddress,
-    nonce,
-    setUnderstood,
-    proceedToSign,
-    signFromCurrent,
-    signFromNew,
-    reset,
-  } = useLinkWallet(identityId);
+  const { step, isLoading, error, newAddress, signFromCurrent, signFromNew, reset } = useLinkWallet(
+    identityId,
+    address ?? undefined,
+  );
+  // compat shims for old UI fields
+  const understood = true;
+  const nonce = 0;
+  const setUnderstood = (_: boolean) => {};
+  const proceedToSign = () => {};
 
   const currentAddress = address ?? "";
   const currentScore = Number(score);
@@ -692,7 +688,7 @@ export default function LinkWalletPage() {
             <ScrollableRegion>
               {step === 1 && (
                 <Step1Review
-                  identityId={identityId}
+                  identityId={Number(identityId)}
                   currentAddress={currentAddress}
                   walletCount={wallets.length}
                   score={currentScore}
@@ -703,7 +699,7 @@ export default function LinkWalletPage() {
               )}
               {step === 2 && (
                 <Step2Sign
-                  identityId={identityId}
+                  identityId={Number(identityId)}
                   currentAddress={currentAddress}
                   nonce={nonce}
                   isLoading={isLoading}
@@ -712,7 +708,7 @@ export default function LinkWalletPage() {
               )}
               {step === 3 && (
                 <Step3Switch
-                  identityId={identityId}
+                  identityId={Number(identityId)}
                   currentAddress={currentAddress}
                   isLoading={isLoading}
                   onSign={signFromNew}
@@ -720,7 +716,7 @@ export default function LinkWalletPage() {
               )}
               {step === 4 && (
                 <Step4Confirm
-                  identityId={identityId}
+                  identityId={Number(identityId)}
                   walletCount={wallets.length}
                   newAddress={newAddress}
                   onDashboard={() => {

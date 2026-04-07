@@ -40,7 +40,7 @@ export default function IdentityPage() {
   const [activeTab, setActiveTab] = useState("pulse");
   const { tokenId } = useSurgeIdentity();
   const { address } = useAccount();
-  const identityId = Number(tokenId ?? 0);
+  const identityId = tokenId ?? 0n;
   const { wallets } = useWalletManagement(identityId);
   const {
     activities,
@@ -56,7 +56,7 @@ export default function IdentityPage() {
   const { claimable, claim, isClaiming, isClaimed, refetchCanClaim } = useBadges();
   const { chainScores, totalScore } = useChainScores(address);
   const activeChainNames = chainScores.filter((c) => c.score > 0).map((c) => c.shortName);
-  const { wallets: walletsWithChains } = useWalletManagement(identityId, activeChainNames);
+  const { wallets: walletsWithChains } = useWalletManagement(identityId);
 
   useEffect(() => {
     if (isClaimed) refetchCanClaim();
@@ -69,7 +69,7 @@ export default function IdentityPage() {
   const activeChainCount = chainScores.filter((c) => c.score > 0).length;
 
   const cardData: IdentityCardData = {
-    id: identityId,
+    id: Number(identityId),
     tier: getTierFromScore(totalScore),
     score: totalScore,
     walletCount: wallets.length,

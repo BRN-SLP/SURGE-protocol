@@ -1,85 +1,145 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useAccount } from "wagmi";
+import { useMemo } from "react";
+import {
+  useAccount,
+  useChainId,
+  useReadContract,
+  useReadContracts,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+import { SURGE_IDENTITY_ADDRESSES, surgeIdentityAbi } from "@/lib/contracts";
 import type { WalletInfo, WalletStatus } from "@/types";
 
-// Wallet status overrides are stored in localStorage so freeze/compromised survives reload.
-// Key: "surge_wallet_status_<address>" → WalletStatus
+// WalletStatus enum values from contract: 0=Active 1=Frozen 2=PendingCompromise 3=Compromised
+const STATUS_MAP: Record<number, WalletStatus> = {
+  0: "active",
+  1: "frozen",
+  2: "pending",
+  3: "compromised",
+};
 
-function readStatusOverride(address: string): WalletStatus | null {
-  if (typeof window === "undefined") return null;
-  const val = localStorage.getItem(`surge_wallet_status_${address.toLowerCase()}`);
-  if (val === "frozen" || val === "compromised") return val;
-  return null;
-}
-
-function writeStatusOverride(address: string, status: WalletStatus) {
-  if (typeof window === "undefined") return;
-  if (status === "active") {
-    localStorage.removeItem(`surge_wallet_status_${address.toLowerCase()}`);
-  } else {
-    localStorage.setItem(`surge_wallet_status_${address.toLowerCase()}`, status);
-  }
-}
-
-function readLinkedAddresses(identityId: number): string[] {
-  if (typeof window === "undefined") return [];
-  const raw = localStorage.getItem(`surge_linked_wallets_${identityId}`);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw) as string[];
-  } catch {
-    return [];
-  }
-}
-
-export function useWalletManagement(identityId?: number, activeChains?: string[]) {
+export function useWalletManagement(identityId?: bigint) {
   const { address: connectedAddress } = useAccount();
-  const [statusOverrides, setStatusOverrides] = useState<Record<string, WalletStatus>>({});
-  const [primaryAddress, setPrimaryAddress] = useState<string | null>(null);
+  const chainId = useChainId();
+  const identityAddress = SURGE_IDENTITY_ADDRESSES[chainId];
+
+  const enabled = !!identityId && identityId > 0n && !!identityAddress;
+
+  // Read all linked wallets from contract
+  const { data: linkedWallets, refetch: refetchLinked } = useReadContract({
+    address: identityAddress,
+    abi: surgeIdentityAbi,
+    functionName: "getLinkedWallets",
+    args: identityId ? [identityId] : undefined,
+    chainId,
+    query: { enabled },
+  });
+
+  const { data: primaryWallet } = useReadContract({
+    address: identityAddress,
+    abi: surgeIdentityAbi,
+    functionName: "primaryWallet",
+    args: identityId ? [identityId] : undefined,
+    chainId,
+    query: { enabled },
+  });
+
+  // Batch-read walletStatus for each linked wallet
+  const statusContracts = useMemo(() => {
+    if (!linkedWallets || !identityAddress) return [];
+    return linkedWallets.map((wallet) => ({
+      address: identityAddress,
+      abi: surgeIdentityAbi,
+      functionName: "walletStatus" as const,
+      args: [wallet] as const,
+      chainId,
+    }));
+  }, [linkedWallets, identityAddress, chainId]);
+
+  const { data: statusResults } = useReadContracts({
+    contracts: statusContracts,
+    query: { enabled: statusContracts.length > 0 },
+  });
+
+  // Batch-read isSecurityWallet for each linked wallet
+  const securityContracts = useMemo(() => {
+    if (!linkedWallets || !identityId || !identityAddress) return [];
+    return linkedWallets.map((wallet) => ({
+      address: identityAddress,
+      abi: surgeIdentityAbi,
+      functionName: "isSecurityWallet" as const,
+      args: [identityId, wallet] as const,
+      chainId,
+    }));
+  }, [linkedWallets, identityId, identityAddress, chainId]);
+
+  const { data: securityResults } = useReadContracts({
+    contracts: securityContracts,
+    query: { enabled: securityContracts.length > 0 },
+  });
 
   const wallets = useMemo<WalletInfo[]>(() => {
-    if (!connectedAddress) return [];
+    if (!linkedWallets) return [];
+    return linkedWallets.map((walletAddr, i) => {
+      const statusRaw = statusResults?.[i]?.result;
+      const status = STATUS_MAP[Number(statusRaw) ?? 0] ?? "active";
+      const isSecurity = securityResults?.[i]?.result ?? false;
+      const isPrimary = primaryWallet?.toLowerCase() === walletAddr.toLowerCase();
 
-    const id = identityId ?? 0;
-    const connectedLower = connectedAddress.toLowerCase();
-    const linkedAddresses = readLinkedAddresses(id).filter((a) => a !== connectedLower);
+      return {
+        address: walletAddr,
+        role: isPrimary ? "primary" : "regular",
+        status,
+        isSecurityWallet: isSecurity as boolean,
+        score: 0,
+        txCount: 0,
+        chains: ["—"],
+        linkedSince: "—",
+        isCurrentWallet: walletAddr.toLowerCase() === connectedAddress?.toLowerCase(),
+      };
+    });
+  }, [linkedWallets, statusResults, securityResults, primaryWallet, connectedAddress]);
 
-    const resolvedPrimary = primaryAddress ?? connectedLower;
-    const chains = activeChains && activeChains.length > 0 ? activeChains : ["—"];
+  // ── selfFreeze ─────────────────────────────────────────────────────────────
 
-    const primary: WalletInfo = {
-      address: connectedAddress,
-      role: resolvedPrimary === connectedLower ? "primary" : "regular",
-      status: statusOverrides[connectedLower] ?? readStatusOverride(connectedAddress) ?? "active",
-      score: 0,
-      txCount: 0,
-      chains,
-      linkedSince: "—",
-      isCurrentWallet: true,
-    };
+  const {
+    writeContract: writeFreeze,
+    data: freezeTxHash,
+    isPending: isFreezing,
+    error: freezeWriteError,
+  } = useWriteContract();
 
-    const others: WalletInfo[] = linkedAddresses.map((addr) => ({
-      address: addr,
-      role: resolvedPrimary === addr.toLowerCase() ? "primary" : "regular",
-      status: statusOverrides[addr.toLowerCase()] ?? readStatusOverride(addr) ?? "active",
-      score: 0,
-      txCount: 0,
-      chains: ["—"],
-      linkedSince: "—",
-    }));
+  const { isLoading: isFreezeConfirming, isSuccess: isFrozen } = useWaitForTransactionReceipt({
+    hash: freezeTxHash,
+  });
 
-    return [primary, ...others];
-  }, [connectedAddress, identityId, statusOverrides, primaryAddress, activeChains]);
-
-  const updateWalletStatus = (address: string, status: WalletStatus) => {
-    writeStatusOverride(address, status);
-    setStatusOverrides((prev) => ({ ...prev, [address.toLowerCase()]: status }));
+  const selfFreeze = () => {
+    if (!identityAddress) return;
+    writeFreeze({
+      address: identityAddress,
+      abi: surgeIdentityAbi,
+      functionName: "selfFreeze",
+    });
   };
 
-  const setAsPrimary = (address: string) => {
-    setPrimaryAddress(address.toLowerCase());
+  // ── setPrimary ─────────────────────────────────────────────────────────────
+
+  const {
+    writeContract: writePrimary,
+    data: primaryTxHash,
+    isPending: isSettingPrimary,
+  } = useWriteContract();
+
+  const setPrimary = (newPrimary: `0x${string}`) => {
+    if (!identityAddress) return;
+    writePrimary({
+      address: identityAddress,
+      abi: surgeIdentityAbi,
+      functionName: "setPrimary",
+      args: [newPrimary],
+    });
   };
 
   const activeCount = wallets.filter((w) => w.status === "active").length;
@@ -87,10 +147,16 @@ export function useWalletManagement(identityId?: number, activeChains?: string[]
 
   return {
     wallets,
-    updateWalletStatus,
-    setAsPrimary,
+    primaryWallet,
     activeCount,
     hasPendingActions,
     multiSigEnabled: activeCount >= 2,
+    selfFreeze,
+    isFreezing: isFreezing || isFreezeConfirming,
+    isFrozen,
+    freezeError: freezeWriteError?.message ?? null,
+    setPrimary,
+    isSettingPrimary,
+    refetch: refetchLinked,
   };
 }

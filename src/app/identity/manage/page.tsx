@@ -543,9 +543,13 @@ function WalletCard({ wallet, onSetPrimary, onFreeze, onCompromised }: WalletCar
 
 export default function WalletManagePage() {
   const { tokenId } = useSurgeIdentity();
-  const identityId = Number(tokenId ?? 0);
-  const { wallets, activeCount, updateWalletStatus, setAsPrimary } =
-    useWalletManagement(identityId);
+  const identityId = tokenId ?? 0n;
+  const { wallets, activeCount, selfFreeze, setPrimary } = useWalletManagement(identityId);
+  // compat shims for UI that uses old API names
+  const updateWalletStatus = (addr: string, status: string) => {
+    if (status === "frozen") selfFreeze();
+  };
+  const setAsPrimary = (addr: string) => setPrimary(addr as `0x${string}`);
 
   const [modalType, setModalType] = useState<ModalType>(null);
   const [targetWallet, setTargetWallet] = useState<WalletInfo | null>(null);
