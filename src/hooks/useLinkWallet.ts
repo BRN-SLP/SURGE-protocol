@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useSignMessage, useAccount } from "wagmi";
+import { useSignMessage, useAccount, useSwitchChain } from "wagmi";
+
+const BASE_SEPOLIA_ID = 84532;
 
 export type LinkStep = 1 | 2 | 3 | 4;
 
@@ -34,7 +36,7 @@ function buildLinkMessage(identityId: number, role: "current" | "new", nonce: nu
     "I authorize linking a new wallet to SURGE",
     `Identity #${String(identityId).padStart(5, "0")}.`,
     `Role: ${role === "current" ? "Authorizer" : "New Linked Wallet"}`,
-    `Chain: Base (8453)`,
+    `Chain: Base Sepolia (84532)`,
     `Nonce: ${nonce}`,
   ].join("\n");
 }
@@ -42,8 +44,9 @@ function buildLinkMessage(identityId: number, role: "current" | "new", nonce: nu
 export function useLinkWallet(identityId?: number) {
   const [state, setState] = useState<LinkWalletState>(INITIAL_STATE);
   const [nonce] = useState(() => Math.floor(Date.now() / 1000));
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const { signMessageAsync } = useSignMessage();
+  const { switchChainAsync } = useSwitchChain();
 
   const id = identityId ?? 0;
 
@@ -58,6 +61,9 @@ export function useLinkWallet(identityId?: number) {
     }
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
+      if (chainId !== BASE_SEPOLIA_ID) {
+        await switchChainAsync({ chainId: BASE_SEPOLIA_ID });
+      }
       const message = buildLinkMessage(id, "current", nonce);
       const signature = await signMessageAsync({ message });
       setState((s) => ({
@@ -80,6 +86,9 @@ export function useLinkWallet(identityId?: number) {
     }
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
+      if (chainId !== BASE_SEPOLIA_ID) {
+        await switchChainAsync({ chainId: BASE_SEPOLIA_ID });
+      }
       const message = buildLinkMessage(id, "new", nonce);
       const signature = await signMessageAsync({ message });
 
