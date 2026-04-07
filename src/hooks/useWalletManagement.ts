@@ -34,7 +34,7 @@ function readLinkedAddresses(identityId: number): string[] {
   }
 }
 
-export function useWalletManagement(identityId?: number) {
+export function useWalletManagement(identityId?: number, activeChains?: string[]) {
   const { address: connectedAddress } = useAccount();
   const [statusOverrides, setStatusOverrides] = useState<Record<string, WalletStatus>>({});
   const [primaryAddress, setPrimaryAddress] = useState<string | null>(null);
@@ -47,6 +47,7 @@ export function useWalletManagement(identityId?: number) {
     const linkedAddresses = readLinkedAddresses(id).filter((a) => a !== connectedLower);
 
     const resolvedPrimary = primaryAddress ?? connectedLower;
+    const chains = activeChains && activeChains.length > 0 ? activeChains : ["—"];
 
     const primary: WalletInfo = {
       address: connectedAddress,
@@ -54,7 +55,7 @@ export function useWalletManagement(identityId?: number) {
       status: statusOverrides[connectedLower] ?? readStatusOverride(connectedAddress) ?? "active",
       score: 0,
       txCount: 0,
-      chains: ["Base"],
+      chains,
       linkedSince: "—",
       isCurrentWallet: true,
     };
@@ -65,12 +66,12 @@ export function useWalletManagement(identityId?: number) {
       status: statusOverrides[addr.toLowerCase()] ?? readStatusOverride(addr) ?? "active",
       score: 0,
       txCount: 0,
-      chains: ["Base"],
+      chains: ["—"],
       linkedSince: "—",
     }));
 
     return [primary, ...others];
-  }, [connectedAddress, identityId, statusOverrides, primaryAddress]);
+  }, [connectedAddress, identityId, statusOverrides, primaryAddress, activeChains]);
 
   const updateWalletStatus = (address: string, status: WalletStatus) => {
     writeStatusOverride(address, status);

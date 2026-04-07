@@ -46,6 +46,8 @@ export default function IdentityPage() {
     useDashboardData(tokenId, wallets.length);
   const { claimable, claim, isClaiming, isClaimed, refetchCanClaim } = useBadges();
   const { chainScores, totalScore } = useChainScores(address);
+  const activeChainNames = chainScores.filter((c) => c.score > 0).map((c) => c.shortName);
+  const { wallets: walletsWithChains } = useWalletManagement(identityId, activeChainNames);
 
   useEffect(() => {
     if (isClaimed) refetchCanClaim();
@@ -121,7 +123,7 @@ export default function IdentityPage() {
                 chainScores={chainScores}
               />
             )}
-            {activeTab === "wallets" && <WalletsTab wallets={wallets} />}
+            {activeTab === "wallets" && <WalletsTab wallets={walletsWithChains} />}
             {activeTab === "badges" && (
               <BadgesTab
                 badges={badges}
