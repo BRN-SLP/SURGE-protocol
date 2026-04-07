@@ -22,14 +22,14 @@ export const CHAIN_CONFIGS: ChainConfig[] = [
     name: "Base Sepolia",
     shortName: "Base",
     chainId: 84532,
-    subgraphUrl: "https://api.studio.thegraph.com/query/1747406/surge-protocol/v0.0.3",
+    subgraphUrl: "https://api.studio.thegraph.com/query/1747406/surge-protocol/v0.0.4",
   },
   {
     key: "op-sepolia",
     name: "OP Sepolia",
     shortName: "OP",
     chainId: 11155420,
-    subgraphUrl: "https://api.studio.thegraph.com/query/1747406/surge-protocol-op/v0.0.1",
+    subgraphUrl: "https://api.studio.thegraph.com/query/1747406/surge-protocol-op/v0.0.2",
   },
   {
     key: "mode-sepolia",
