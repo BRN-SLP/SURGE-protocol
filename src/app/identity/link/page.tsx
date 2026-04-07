@@ -269,7 +269,7 @@ function Step2Sign({
           I authorize linking a new wallet to SURGE
           <br />
           Identity #{String(identityId).padStart(5, "0")}.<br />
-          Chain: Base (8453)
+          Chain: Base Sepolia (84532)
           <br />
           Nonce: {nonce}
         </div>
