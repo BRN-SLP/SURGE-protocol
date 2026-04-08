@@ -197,13 +197,19 @@ function Step2Sign({
   currentAddress,
   nonce,
   isLoading,
+  newAddress,
+  onSetNewAddress,
   onSign,
+  error,
 }: {
   identityId: number;
   currentAddress: string;
   nonce: number;
   isLoading: boolean;
+  newAddress: string;
+  onSetNewAddress: (addr: string) => void;
   onSign: () => void;
+  error: string | null;
 }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -275,13 +281,46 @@ function Step2Sign({
         </div>
       </div>
 
+      {/* New wallet address input */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <span
+          style={{
+            fontSize: "0.75rem",
+            color: "var(--text-faint)",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+          }}
+        >
+          New wallet address
+        </span>
+        <input
+          type="text"
+          placeholder="0x…"
+          value={newAddress}
+          onChange={(e) => onSetNewAddress(e.target.value)}
+          style={{
+            padding: "12px 16px",
+            background: "var(--surface)",
+            border: `1px solid ${error && !newAddress ? "var(--accent)" : "var(--border)"}`,
+            borderRadius: "var(--radius-sm)",
+            color: "var(--text)",
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.82rem",
+            outline: "none",
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        />
+        {error && <p style={{ fontSize: "0.75rem", color: "var(--accent)", margin: 0 }}>{error}</p>}
+      </div>
+
       <button
         onClick={onSign}
-        disabled={isLoading}
+        disabled={isLoading || !newAddress}
         style={{
           padding: "12px 28px",
-          background: isLoading ? "var(--surface-2)" : "var(--accent)",
-          color: isLoading ? "var(--text-faint)" : "#fff",
+          background: isLoading || !newAddress ? "var(--surface-2)" : "var(--accent)",
+          color: isLoading || !newAddress ? "var(--text-faint)" : "#fff",
           border: "none",
           borderRadius: "var(--radius-sm)",
           fontSize: "0.8rem",
@@ -289,7 +328,7 @@ function Step2Sign({
           fontWeight: 500,
           letterSpacing: "0.08em",
           textTransform: "uppercase",
-          cursor: isLoading ? "not-allowed" : "pointer",
+          cursor: isLoading || !newAddress ? "not-allowed" : "pointer",
           transition: "background 0.2s ease",
           alignSelf: "flex-start",
         }}
@@ -646,6 +685,7 @@ export default function LinkWalletPage() {
     isLoading,
     error,
     newAddress,
+    setNewAddress,
     setUnderstood,
     proceedToSign,
     signFromCurrent,
@@ -707,7 +747,10 @@ export default function LinkWalletPage() {
                   currentAddress={currentAddress}
                   nonce={nonce}
                   isLoading={isLoading}
+                  newAddress={newAddress}
+                  onSetNewAddress={setNewAddress}
                   onSign={signFromCurrent}
+                  error={error}
                 />
               )}
               {step === 3 && (
