@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
+import { gsap, registerGsap } from "@/lib/gsap";
 
 const CHAINS = [
   { name: "OP Mainnet" },
@@ -32,12 +32,13 @@ export function EcosystemSection() {
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     registerGsap();
 
     const ctx = gsap.context(() => {
       const header = sectionRef.current?.querySelector(".eco-header");
 
-      if (header) {
+      if (header && !prefersReduced) {
         gsap.from(header, {
           opacity: 0,
           duration: 0.5,
@@ -49,7 +50,7 @@ export function EcosystemSection() {
 
     // Marquee: GSAP infinite scroll
     const track = trackRef.current;
-    if (track) {
+    if (track && !prefersReduced) {
       const totalWidth = track.scrollWidth / 2; // half because items are doubled
       gsap.to(track, {
         x: -totalWidth,
@@ -64,7 +65,6 @@ export function EcosystemSection() {
 
     return () => {
       ctx.revert();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
       const track = trackRef.current;
       if (track) gsap.killTweensOf(track);
     };
@@ -73,6 +73,7 @@ export function EcosystemSection() {
   return (
     <section
       ref={sectionRef}
+      aria-label="Ecosystem"
       style={{
         paddingTop: "clamp(2rem, 4vw, 3rem)",
         paddingBottom: "clamp(2rem, 4vw, 3rem)",
@@ -125,6 +126,7 @@ export function EcosystemSection() {
             {MARQUEE_ITEMS.map((chain, i) => (
               <div
                 key={i}
+                aria-hidden={i >= CHAINS.length ? "true" : undefined}
                 className="shrink-0 px-5 py-2.5 text-xs font-light tracking-widest uppercase"
                 style={{
                   border: "1px solid var(--border)",

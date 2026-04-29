@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
+import { gsap, registerGsap } from "@/lib/gsap";
 
 const STEPS = [
   {
@@ -71,6 +71,7 @@ export function HowItWorksSection() {
   const stackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     registerGsap();
 
     const ctx = gsap.context(() => {
@@ -192,7 +193,6 @@ export function HowItWorksSection() {
 
     return () => {
       ctx.revert();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);
 

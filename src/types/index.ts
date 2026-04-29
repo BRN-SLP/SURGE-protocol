@@ -117,6 +117,7 @@ export interface WalletInfo {
   chains: string[]; // e.g. ["Ethereum", "Base", "OP"]
   linkedSince: string; // e.g. "Jan 2024"
   isCurrentWallet?: boolean;
+  isSecurityWallet?: boolean;
 }
 
 // ── Badges ───────────────────────────────────────────────────

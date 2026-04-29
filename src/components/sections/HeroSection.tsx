@@ -132,6 +132,7 @@ export function HeroSection() {
   }, []);
 
   useEffect(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     registerGsap();
 
     const btn = flairBtnRef.current;
@@ -145,6 +146,21 @@ export function HeroSection() {
       btn.addEventListener("mouseenter", handleFlairEnter);
       btn.addEventListener("mousemove", handleFlairMove);
       btn.addEventListener("mouseleave", handleFlairLeave);
+    }
+
+    if (prefersReduced) {
+      // Show final stat values immediately without animating
+      LIVE_STATS.forEach(({ raw, format }, i) => {
+        const el = statValRefs.current[i];
+        if (el) el.textContent = format(raw);
+      });
+      return () => {
+        if (btn) {
+          btn.removeEventListener("mouseenter", handleFlairEnter);
+          btn.removeEventListener("mousemove", handleFlairMove);
+          btn.removeEventListener("mouseleave", handleFlairLeave);
+        }
+      };
     }
 
     const ctx = gsap.context(() => {
@@ -200,6 +216,7 @@ export function HeroSection() {
   return (
     <section
       ref={sectionRef}
+      aria-label="Hero"
       className="relative flex items-center overflow-hidden"
       style={{ minHeight: "calc(100dvh - 64px)" }}
     >
@@ -232,7 +249,8 @@ export function HeroSection() {
             {/* Headline with T1 word stagger */}
             <h1
               ref={headlineRef}
-              className="font-display text-[50px] leading-[1.08] font-light tracking-tighter"
+              className="font-display leading-[1.08] font-light tracking-tighter"
+              style={{ fontSize: "clamp(2rem, 6vw, 3.25rem)" }}
             >
               {HEADLINE.map((line, li) => (
                 <span key={li} style={{ display: "block" }}>
@@ -319,7 +337,11 @@ export function HeroSection() {
                 }}
                 aria-label="Initialize SURGE Protocol"
               >
-                <span ref={flairElRef} className="flair-el" style={{ background: "#dc3333" }} />
+                <span
+                  ref={flairElRef}
+                  className="flair-el"
+                  style={{ background: "var(--accent)" }}
+                />
                 <span style={{ position: "relative", zIndex: 1 }}>{ctaLabel}</span>
               </button>
 
@@ -353,7 +375,7 @@ export function HeroSection() {
               style={{ borderTop: "1px solid var(--border)" }}
             >
               {LIVE_STATS.map((stat, i) => (
-                <div key={stat.label}>
+                <div key={stat.label} aria-live="polite" aria-atomic="true">
                   <span
                     ref={(el) => {
                       statValRefs.current[i] = el;

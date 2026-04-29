@@ -17,7 +17,7 @@ const NAV_LINKS = [
 function NotificationBell() {
   return (
     <button
-      title="Notifications"
+      aria-label="Notifications"
       style={{
         background: "none",
         border: "none",
@@ -72,6 +72,7 @@ function ConnectButton() {
         borderRadius: "var(--radius-sm)",
         border: "1px solid var(--border)",
         transition: "border-color 0.2s",
+        minHeight: "44px",
       }}
       onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
       onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
@@ -106,6 +107,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" aria-label="SURGE Protocol home" className="flex items-center">
             <span
+              aria-hidden="true"
               className="glitch-text font-display text-2xl font-light tracking-[0.25em] uppercase"
               data-text="SURGE"
               style={{ color: "var(--text)" }}
@@ -115,7 +117,7 @@ export function Navbar() {
           </Link>
 
           {/* Desktop nav links */}
-          <nav className="hidden h-full items-center gap-8 md:flex">
+          <nav aria-label="Primary navigation" className="hidden h-full items-center gap-8 md:flex">
             {NAV_LINKS.map((link) => {
               const active = isActive(link.href);
               return (
@@ -125,7 +127,7 @@ export function Navbar() {
                   aria-current={active ? "page" : undefined}
                   className="flex h-full items-center text-sm font-light tracking-tight uppercase transition-colors duration-0"
                   style={{
-                    color: active ? "var(--text)" : "rgba(245,245,245,0.5)",
+                    color: active ? "var(--text)" : "var(--text-muted)",
                     borderBottom: active ? "1px solid var(--accent)" : "1px solid transparent",
                   }}
                   onMouseEnter={(e) => {
@@ -137,7 +139,7 @@ export function Navbar() {
                   onMouseLeave={(e) => {
                     if (!active) {
                       e.currentTarget.style.borderBottomColor = "transparent";
-                      e.currentTarget.style.color = "rgba(245,245,245,0.5)";
+                      e.currentTarget.style.color = "var(--text-muted)";
                     }
                   }}
                 >
@@ -213,6 +215,7 @@ export function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18 }}
+            aria-label="Mobile navigation"
             className="fixed right-0 left-0 z-40 md:hidden"
             style={{
               top: 64,
@@ -236,9 +239,9 @@ export function Navbar() {
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
                     color: active ? "var(--text)" : "var(--text-muted)",
-                    borderLeft: active ? "2px solid var(--accent)" : "2px solid transparent",
+                    background: active ? "rgba(220,51,51,0.06)" : "transparent",
                     borderBottom: "1px solid var(--border)",
-                    transition: "color 0.15s",
+                    transition: "color 0.15s, background 0.15s",
                   }}
                 >
                   {link.label}

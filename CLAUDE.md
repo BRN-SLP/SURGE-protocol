@@ -1,5 +1,18 @@
 @AGENTS.md
 
+# Wiki
+
+**При старте** сначала спроси: "Над чем работаем — SURGE Protocol, другой проект, или задача вне проекта?"
+
+Только если ответ касается SURGE — читай `~/knowledge/surge/wiki/hot.md` (контекст, открытые задачи, решения).
+
+**Обновляй hot.md** после значимых задач, при `/clear`, или в конце сессии.
+
+Схема wiki: `~/knowledge/surge/CLAUDE.md`
+Services registry: `~/knowledge/surge/SERVICES.md`
+
+---
+
 # SURGE Protocol — рабочий контекст
 
 ## Проект

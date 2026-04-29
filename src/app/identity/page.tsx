@@ -55,8 +55,6 @@ export default function IdentityPage() {
   } = useDashboardData(tokenId, wallets.length);
   const { claimable, claim, isClaiming, isClaimed, refetchCanClaim } = useBadges();
   const { chainScores, totalScore } = useChainScores(address);
-  const activeChainNames = chainScores.filter((c) => c.score > 0).map((c) => c.shortName);
-  const { wallets: walletsWithChains } = useWalletManagement(identityId);
 
   useEffect(() => {
     if (isClaimed) refetchCanClaim();
@@ -149,7 +147,7 @@ export default function IdentityPage() {
                 chainScores={chainScores}
               />
             )}
-            {activeTab === "wallets" && <WalletsTab wallets={walletsWithChains} />}
+            {activeTab === "wallets" && <WalletsTab wallets={wallets} />}
             {activeTab === "badges" && (
               <BadgesTab
                 badges={badges}
@@ -174,7 +172,7 @@ export default function IdentityPage() {
           title="Dashboard"
           actions={
             <>
-              <GhostButton href="/identity/verify" size="sm">
+              <GhostButton href={address ? `/verify/${address}` : "/verify"} size="sm">
                 <Share2
                   size={12}
                   strokeWidth={1.25}

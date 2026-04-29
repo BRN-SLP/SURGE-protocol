@@ -7,8 +7,9 @@ import {
   useSignTypedData,
   useWriteContract,
   useWaitForTransactionReceipt,
-  useReadContract,
+  usePublicClient,
 } from "wagmi";
+import { isAddress } from "viem";
 import { SURGE_IDENTITY_ADDRESSES, surgeIdentityAbi } from "@/lib/contracts";
 
 export type LinkStep = 1 | 2 | 3 | 4;
@@ -58,24 +59,7 @@ export function useLinkWallet(identityId?: bigint, currentWallet?: `0x${string}`
   const { address } = useAccount();
   const chainId = useChainId();
   const identityAddress = SURGE_IDENTITY_ADDRESSES[chainId];
-
-  const { data: currentNonce } = useReadContract({
-    address: identityAddress,
-    abi: surgeIdentityAbi,
-    functionName: "nonces",
-    args: currentWallet ? [currentWallet] : undefined,
-    chainId,
-    query: { enabled: !!currentWallet && !!identityAddress },
-  });
-
-  const { data: newNonce } = useReadContract({
-    address: identityAddress,
-    abi: surgeIdentityAbi,
-    functionName: "nonces",
-    args: state.newAddress ? [state.newAddress as `0x${string}`] : undefined,
-    chainId,
-    query: { enabled: !!state.newAddress && !!identityAddress },
-  });
+  const publicClient = usePublicClient({ chainId });
 
   const domainBase = {
     name: "SurgeIdentity",
@@ -99,12 +83,26 @@ export function useLinkWallet(identityId?: bigint, currentWallet?: `0x${string}`
     error: receiptError,
   } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const setNewAddress = (addr: string) =>
+  const setNewAddress = (addr: string) => {
+    if (addr && !isAddress(addr)) {
+      setState((s) => ({ ...s, newAddress: addr, error: "Invalid Ethereum address" }));
+      return;
+    }
+    const lower = addr.toLowerCase();
+    if (addr && (lower === address?.toLowerCase() || lower === currentWallet?.toLowerCase())) {
+      setState((s) => ({
+        ...s,
+        newAddress: addr,
+        error: "This wallet is already linked to your identity",
+      }));
+      return;
+    }
     setState((s) => ({ ...s, newAddress: addr, error: null }));
+  };
 
   // Step 2: Current wallet signs LinkWallet typed data
   const signFromCurrent = async () => {
-    if (!address || !identityId || !currentWallet || currentNonce === undefined) {
+    if (!address || !identityId || !currentWallet || !identityAddress || !publicClient) {
       setState((s) => ({
         ...s,
         error: "Missing data — ensure wallet is connected and identity loaded",
@@ -117,6 +115,12 @@ export function useLinkWallet(identityId?: bigint, currentWallet?: `0x${string}`
     }
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
+      const freshCurrentNonce = await publicClient.readContract({
+        address: identityAddress,
+        abi: surgeIdentityAbi,
+        functionName: "nonces",
+        args: [currentWallet],
+      });
       const sig = await signTypedDataAsync({
         domain: domainBase,
         types: LINK_WALLET_TYPE,
@@ -125,7 +129,7 @@ export function useLinkWallet(identityId?: bigint, currentWallet?: `0x${string}`
           identityId,
           currentWallet,
           newWallet: state.newAddress as `0x${string}`,
-          nonce: currentNonce,
+          nonce: freshCurrentNonce,
           deadline,
         },
       });
@@ -138,12 +142,18 @@ export function useLinkWallet(identityId?: bigint, currentWallet?: `0x${string}`
 
   // Step 3: New wallet signs JoinIdentity typed data
   const signFromNew = async () => {
-    if (!address || !identityId || !currentWallet || newNonce === undefined) {
+    if (!address || !identityId || !currentWallet || !identityAddress || !publicClient) {
       setState((s) => ({ ...s, error: "Switch to the new wallet and ensure it is connected" }));
       return;
     }
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
+      const freshNewNonce = await publicClient.readContract({
+        address: identityAddress,
+        abi: surgeIdentityAbi,
+        functionName: "nonces",
+        args: [address],
+      });
       const sig = await signTypedDataAsync({
         domain: domainBase,
         types: JOIN_IDENTITY_TYPE,
@@ -152,7 +162,7 @@ export function useLinkWallet(identityId?: bigint, currentWallet?: `0x${string}`
           identityId,
           currentWallet,
           newWallet: address,
-          nonce: newNonce,
+          nonce: freshNewNonce,
           deadline,
         },
       });
@@ -173,6 +183,10 @@ export function useLinkWallet(identityId?: bigint, currentWallet?: `0x${string}`
   const submitLinkWallet = () => {
     if (!identityAddress || !state.currentSignature || !state.newSignature || !state.newAddress)
       return;
+    if (BigInt(Math.floor(Date.now() / 1000)) >= deadline) {
+      setState((s) => ({ ...s, error: "Signatures expired — please restart the process" }));
+      return;
+    }
     writeContract({
       address: identityAddress,
       abi: surgeIdentityAbi,

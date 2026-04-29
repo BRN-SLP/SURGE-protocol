@@ -3,6 +3,7 @@ import { Roboto_Condensed } from "next/font/google";
 import { PostHogProvider } from "@/components/providers/PostHogProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Web3Provider } from "@/components/providers/Web3Provider";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 import "./globals.css";
 
 const robotoCondensed = Roboto_Condensed({
@@ -45,6 +46,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={robotoCondensed.variable} suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preload"
+          as="style"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&icon_names=key,password,terminal"
+        />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&icon_names=key,password,terminal"
@@ -53,7 +61,9 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col">
         <ThemeProvider>
           <Web3Provider>
-            <PostHogProvider>{children}</PostHogProvider>
+            <ToastProvider>
+              <PostHogProvider>{children}</PostHogProvider>
+            </ToastProvider>
           </Web3Provider>
         </ThemeProvider>
       </body>

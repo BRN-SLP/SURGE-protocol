@@ -3,24 +3,26 @@
 interface ToggleProps {
   on: boolean;
   onChange: () => void;
+  disabled?: boolean;
 }
 
-export function Toggle({ on, onChange }: ToggleProps) {
+export function Toggle({ on, onChange, disabled }: ToggleProps) {
   return (
     <button
       onClick={(e) => {
         e.stopPropagation();
-        onChange();
+        if (!disabled) onChange();
       }}
       aria-checked={on}
       role="switch"
+      disabled={disabled}
       style={{
         width: 36,
         height: 20,
         borderRadius: 99,
         background: on ? "var(--text-muted)" : "var(--border)",
         border: "none",
-        cursor: "pointer",
+        cursor: disabled ? "default" : "pointer",
         position: "relative",
         flexShrink: 0,
         transition: "background 0.2s ease",

@@ -19,6 +19,9 @@
   --accent: #dc3333;
   --accent-hover: #c42020;
   --success: #22aa66;
+  --color-score: #22b5cc;
+  --color-badge: #f0aa20;
+  --color-link: #4d8eff;
 }
 
 /* ── Light theme ────────────────────────────────────────── */
@@ -34,13 +37,16 @@
   --accent: #dc3333;
   --accent-hover: #c42020;
   --success: #18884d;
+  --color-score: #1d9db3;
+  --color-badge: #d4941a;
+  --color-link: #3a78f0;
 }
 
 /* ── Spacing & radius tokens ────────────────────────────── */
 :root {
-  --radius-sm: 10px;
-  --radius-md: 10px;
-  --radius-lg: 10px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --section-px: clamp(1.5rem, 5vw, 5rem);
   --section-py: clamp(4rem, 8vw, 8rem);
   --block-gap: clamp(1rem, 2.5vw, 2rem);
@@ -84,6 +90,13 @@ body {
 ::selection {
   background-color: rgba(220, 51, 51, 0.2);
   color: var(--text);
+}
+
+/* ── Focus visible ──────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 /* ── T3 Typewriter cursor ───────────────────────────────── */

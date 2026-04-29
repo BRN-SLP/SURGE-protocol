@@ -22,21 +22,19 @@ export function Footer() {
         className="text-[11px] font-light tracking-widest uppercase"
         style={{ color: "var(--text-faint)" }}
       >
-        © 2024 SURGE PROTOCOL. ALL RIGHTS RESERVED.
+        © {new Date().getFullYear()} SURGE PROTOCOL. ALL RIGHTS RESERVED.
       </div>
 
       <nav aria-label="Footer navigation" className="flex gap-6">
         {FOOTER_LINKS.map((link) => (
-          <a
+          <span
             key={link.label}
-            href={link.href}
-            className="text-[11px] font-light tracking-widest uppercase transition-colors duration-0"
+            aria-label={`${link.label} (coming soon)`}
+            className="cursor-not-allowed text-[11px] font-light tracking-widest uppercase"
             style={{ color: "var(--text-faint)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-faint)")}
           >
             {link.label}
-          </a>
+          </span>
         ))}
       </nav>
     </footer>

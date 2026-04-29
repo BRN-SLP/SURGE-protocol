@@ -38,6 +38,7 @@ export function FinalCTA() {
 
   return (
     <section
+      aria-label="Early access"
       style={{
         paddingLeft: "var(--section-px)",
         paddingRight: "var(--section-px)",
@@ -142,7 +143,7 @@ export function FinalCTA() {
                       if (error) setError(null);
                     }}
                     placeholder="your@email.com"
-                    className="w-full px-4 py-3 text-sm focus:outline-none"
+                    className="w-full px-4 py-3 text-sm"
                     style={{
                       background: "transparent",
                       border: "1px solid var(--border)",
@@ -177,7 +178,7 @@ export function FinalCTA() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="shrink-0 px-6 py-3 text-sm font-light focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                  className="shrink-0 px-6 py-3 text-sm font-light disabled:cursor-not-allowed disabled:opacity-60"
                   style={{
                     background: "var(--surface-2)",
                     color: "var(--text)",

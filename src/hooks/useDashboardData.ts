@@ -155,6 +155,7 @@ export function useDashboardData(tokenId?: bigint, walletCount = 1) {
     if (!tokenId || tokenId === 0n) return;
 
     setLoading(true);
+    setError(null);
     const id = tokenId.toString();
 
     // Query all subgraph chains in parallel; a single chain failure doesn't break the dashboard.

@@ -359,7 +359,7 @@ function CombinedResultCard({ result }: { result: CombinedScore }) {
 
         {/* CTA */}
         <button
-          className="w-full px-6 py-3.5 text-sm font-light text-white transition-colors duration-150 focus:outline-none"
+          className="w-full px-6 py-3.5 text-sm font-light text-white transition-colors duration-150"
           style={{
             background: "var(--accent)",
             borderRadius: "var(--radius-sm)",
@@ -488,7 +488,7 @@ export function ScoreCalculator() {
                   onKeyDown={handleKeyDown}
                   placeholder="0x…"
                   disabled={wallets.length >= MAX_WALLETS}
-                  className="min-w-0 flex-1 px-4 py-3 font-mono text-sm focus:outline-none disabled:opacity-40"
+                  className="min-w-0 flex-1 px-4 py-3 font-mono text-sm disabled:opacity-40"
                   style={{
                     background: "transparent",
                     border: "1px solid var(--border)",
@@ -506,7 +506,7 @@ export function ScoreCalculator() {
                 <button
                   onClick={handleAdd}
                   disabled={wallets.length >= MAX_WALLETS || !input.trim()}
-                  className="shrink-0 px-4 py-3 text-sm font-light text-white transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                  className="shrink-0 px-4 py-3 text-sm font-light text-white transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40"
                   style={{
                     background: "var(--accent)",
                     borderRadius: "var(--radius-sm)",
@@ -590,7 +590,7 @@ export function ScoreCalculator() {
               >
                 <button
                   onClick={handleCalculate}
-                  className="flex-1 py-3.5 text-sm font-light text-white transition-colors duration-150 focus:outline-none"
+                  className="flex-1 py-3.5 text-sm font-light text-white transition-colors duration-150"
                   style={{
                     background: "var(--accent)",
                     borderRadius: "var(--radius-sm)",
@@ -602,7 +602,7 @@ export function ScoreCalculator() {
                 </button>
                 <button
                   onClick={handleReset}
-                  className="px-4 py-3.5 text-sm font-light transition-all duration-200 focus:outline-none"
+                  className="px-4 py-3.5 text-sm font-light transition-all duration-200"
                   style={{
                     border: "1px solid var(--border)",
                     borderRadius: "var(--radius-sm)",
@@ -630,6 +630,8 @@ export function ScoreCalculator() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={viewportOnce}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            aria-live="polite"
+            aria-atomic="true"
           >
             <AnimatePresence mode="wait">
               {result ? (

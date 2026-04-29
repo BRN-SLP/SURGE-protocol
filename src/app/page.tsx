@@ -1,12 +1,17 @@
+import dynamic from "next/dynamic";
 import { Navbar } from "@/components/layout/Navbar";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { ProblemSection } from "@/components/sections/ProblemSection";
-import { HowItWorksSection } from "@/components/sections/HowItWorksSection";
 import { EcosystemSection } from "@/components/sections/EcosystemSection";
 import { ScoreCalculator } from "@/components/sections/ScoreCalculator";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 import { Footer } from "@/components/layout/Footer";
 import { BorderVariantProvider } from "@/components/providers/BorderVariantProvider";
+
+const HowItWorksSection = dynamic(
+  () => import("@/components/sections/HowItWorksSection").then((m) => m.HowItWorksSection),
+  { ssr: false, loading: () => <div style={{ minHeight: "100vh" }} /> },
+);
 
 function GradientDivider() {
   return (

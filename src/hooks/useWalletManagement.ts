@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import {
   useAccount,
   useChainId,
@@ -130,7 +130,12 @@ export function useWalletManagement(identityId?: bigint) {
     writeContract: writePrimary,
     data: primaryTxHash,
     isPending: isSettingPrimary,
+    error: setPrimaryWriteError,
   } = useWriteContract();
+
+  const { isSuccess: isPrimarySet } = useWaitForTransactionReceipt({
+    hash: primaryTxHash,
+  });
 
   const setPrimary = (newPrimary: `0x${string}`) => {
     if (!identityAddress) return;
@@ -141,6 +146,13 @@ export function useWalletManagement(identityId?: bigint) {
       args: [newPrimary],
     });
   };
+
+  // Refetch wallet list after either tx confirms
+  useEffect(() => {
+    if (isFrozen || isPrimarySet) {
+      refetchLinked();
+    }
+  }, [isFrozen, isPrimarySet, refetchLinked]);
 
   const activeCount = wallets.filter((w) => w.status === "active").length;
   const hasPendingActions = wallets.some((w) => w.status === "pending");
@@ -157,6 +169,8 @@ export function useWalletManagement(identityId?: bigint) {
     freezeError: freezeWriteError?.message ?? null,
     setPrimary,
     isSettingPrimary,
+    isPrimarySet,
+    setPrimaryError: setPrimaryWriteError?.message ?? null,
     refetch: refetchLinked,
   };
 }

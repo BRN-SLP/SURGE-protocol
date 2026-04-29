@@ -17,16 +17,43 @@ interface SimAction {
   label: string;
   pts: number;
   category: string;
+  comingSoon?: boolean;
 }
 
+// Live actions reflect real oracle scoring (Phase 1).
+// oracle.active = 10 pts (any tx in cycle) + oracle.txcount up to 25 pts (20+ txs) = 35 max.
+// Coming soon = Phase 2+, not yet implemented in the oracle.
 const SIM_ACTIONS: SimAction[] = [
-  { id: "wallets", label: "Link 2 more wallets", pts: 40, category: "Identity" },
-  { id: "chains", label: "Get active on 3 new chains", pts: 100, category: "Explorer" },
-  { id: "swaps", label: "Complete 10 DEX swaps", pts: 20, category: "DeFi" },
-  { id: "lp", label: "Provide 1 LP position", pts: 50, category: "DeFi" },
-  { id: "governance", label: "Cast 5 governance votes", pts: 50, category: "Governance" },
-  { id: "contracts", label: "Deploy 3 verified contracts", pts: 15, category: "Builder" },
-  { id: "streak", label: "Maintain 30-day activity streak", pts: 50, category: "Activity" },
+  { id: "wallet_link", label: "Link a wallet to your identity", pts: 20, category: "Identity" },
+  {
+    id: "active",
+    label: "Stay active on-chain this cycle (20+ txs)",
+    pts: 35,
+    category: "Activity",
+  },
+  {
+    id: "governance",
+    label: "Vote in DAO governance",
+    pts: 100,
+    category: "Governance",
+    comingSoon: true,
+  },
+  { id: "dex", label: "Execute DEX trades", pts: 25, category: "DeFi", comingSoon: true },
+  { id: "nft", label: "Mint NFTs", pts: 50, category: "NFT", comingSoon: true },
+  {
+    id: "crosschain",
+    label: "Be active on 5+ chains",
+    pts: 200,
+    category: "Explorer",
+    comingSoon: true,
+  },
+  {
+    id: "streak",
+    label: "Maintain 7-day activity streak",
+    pts: 0,
+    category: "Activity",
+    comingSoon: true,
+  },
 ];
 
 // ─── Score Breakdown ──────────────────────────────────────────────────────────
@@ -67,6 +94,8 @@ export default function ScoreSimulatorPage() {
   const [toggled, setToggled] = useState<Set<string>>(new Set());
 
   function toggle(id: string) {
+    const action = SIM_ACTIONS.find((a) => a.id === id);
+    if (!action || action.comingSoon) return;
     setToggled((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -75,7 +104,10 @@ export default function ScoreSimulatorPage() {
     });
   }
 
-  const addedPts = SIM_ACTIONS.filter((a) => toggled.has(a.id)).reduce((sum, a) => sum + a.pts, 0);
+  const addedPts = SIM_ACTIONS.filter((a) => !a.comingSoon && toggled.has(a.id)).reduce(
+    (sum, a) => sum + a.pts,
+    0,
+  );
   const projectedScore = currentScore + addedPts;
 
   const currentTier = getTierFromScore(currentScore);
@@ -280,6 +312,7 @@ export default function ScoreSimulatorPage() {
             <div style={{ display: "flex", flexDirection: "column" }}>
               {SIM_ACTIONS.map((action, i) => {
                 const isOn = toggled.has(action.id);
+                const soon = !!action.comingSoon;
                 return (
                   <div
                     key={action.id}
@@ -290,11 +323,12 @@ export default function ScoreSimulatorPage() {
                       gap: 14,
                       padding: "10px 0",
                       borderTop: i === 0 ? "none" : "1px solid var(--border)",
-                      cursor: "pointer",
+                      cursor: soon ? "default" : "pointer",
                       userSelect: "none",
+                      opacity: soon ? 0.45 : 1,
                     }}
                   >
-                    <Toggle on={isOn} onChange={() => toggle(action.id)} />
+                    <Toggle on={isOn} onChange={() => toggle(action.id)} disabled={soon} />
                     <span
                       style={{
                         flex: 1,
@@ -306,26 +340,45 @@ export default function ScoreSimulatorPage() {
                     >
                       {action.label}
                     </span>
-                    <span
-                      style={{
-                        fontSize: "0.68rem",
-                        color: "var(--text-faint)",
-                        letterSpacing: "0.04em",
-                      }}
-                    >
-                      {action.category}
-                    </span>
+                    {soon ? (
+                      <span
+                        style={{
+                          fontSize: "0.58rem",
+                          color: "var(--text-faint)",
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          border: "1px solid var(--border)",
+                          padding: "1px 5px",
+                        }}
+                      >
+                        Soon
+                      </span>
+                    ) : (
+                      <span
+                        style={{
+                          fontSize: "0.68rem",
+                          color: "var(--text-faint)",
+                          letterSpacing: "0.04em",
+                        }}
+                      >
+                        {action.category}
+                      </span>
+                    )}
                     <span
                       style={{
                         fontSize: "0.82rem",
-                        color: isOn ? "var(--text)" : "var(--text-faint)",
+                        color: soon
+                          ? "var(--text-faint)"
+                          : isOn
+                            ? "var(--text)"
+                            : "var(--text-faint)",
                         fontWeight: 300,
                         minWidth: 32,
                         textAlign: "right",
                         transition: "color 0.15s ease",
                       }}
                     >
-                      +{action.pts}
+                      {action.pts > 0 ? `+${action.pts}` : "—"}
                     </span>
                   </div>
                 );

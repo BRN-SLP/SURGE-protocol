@@ -42,7 +42,7 @@ export function Toast({ message, type = "info", visible, onHide, duration = 3000
         style={{
           background: "var(--surface)",
           border: "1px solid var(--border)",
-          borderLeft: `3px solid ${TYPE_COLOR[type]}`,
+          borderTop: `2px solid ${TYPE_COLOR[type]}`,
           borderRadius: "var(--radius-sm)",
           padding: "12px 16px",
           fontSize: "0.85rem",

@@ -1,62 +1,111 @@
 // ── Per-chain contract addresses (v2 — ERC-1155 UUPS rebuild) ─────────────────
+// To add a new chain: add ONE entry here. Nowhere else.
 
-export const SURGE_IDENTITY_ADDRESSES: Record<number, `0x${string}`> = {
-  84532: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3", // Base Sepolia
-  11155420: "0x7BaC76EC1a9E5f048dcF115623EB49d0aA826fDf", // OP Sepolia
-  1301: "0x7BaC76EC1a9E5f048dcF115623EB49d0aA826fDf", // Unichain Sepolia
-  4202: "0x7BaC76EC1a9E5f048dcF115623EB49d0aA826fDf", // Lisk Sepolia
-  4801: "0x7BaC76EC1a9E5f048dcF115623EB49d0aA826fDf", // Worldchain Sepolia
-  763373: "0x7BaC76EC1a9E5f048dcF115623EB49d0aA826fDf", // Ink Sepolia
-  919: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811", // Mode Sepolia
-  999999999: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811", // Zora Sepolia
-  1946: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811", // Soneium Minato
-  11142220: "0x27a4381ef8c9184fa82e7d13af96f562bcfe213b", // Celo Sepolia
+export interface ChainAddresses {
+  identity: `0x${string}`;
+  score: `0x${string}`;
+  attestation: `0x${string}`;
+  badge: `0x${string}`;
+}
+
+export const CHAIN_REGISTRY: Record<number, ChainAddresses> = {
+  84532: {
+    // Base Sepolia
+    identity: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
+    score: "0x2c6DF1C6D80F1a150C89540DAA8c14e44f7AEd33",
+    attestation: "0x12B9DDcE9A0C73cec7bF5fCB089712Ce242eaeb1",
+    badge: "0x3f694EB36609Cc52f0cBb9Beda3Df1B361A4B457",
+  },
+  11155420: {
+    // OP Sepolia
+    identity: "0x7BaC76EC1a9E5f048dcF115623EB49d0aA826fDf",
+    score: "0xCa19812430a7Fe5F800066D102A22EA6279fD856",
+    attestation: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
+    badge: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
+  },
+  1301: {
+    // Unichain Sepolia
+    identity: "0x7BaC76EC1a9E5f048dcF115623EB49d0aA826fDf",
+    score: "0xCa19812430a7Fe5F800066D102A22EA6279fD856",
+    attestation: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
+    badge: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
+  },
+  4202: {
+    // Lisk Sepolia
+    identity: "0x7BaC76EC1a9E5f048dcF115623EB49d0aA826fDf",
+    score: "0x1202e902E1E7c6fe03a0C6a1bc88Ec816EDaeC15",
+    attestation: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
+    badge: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
+  },
+  4801: {
+    // Worldchain Sepolia
+    identity: "0x7BaC76EC1a9E5f048dcF115623EB49d0aA826fDf",
+    score: "0xCa19812430a7Fe5F800066D102A22EA6279fD856",
+    attestation: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
+    badge: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
+  },
+  763373: {
+    // Ink Sepolia
+    identity: "0x7BaC76EC1a9E5f048dcF115623EB49d0aA826fDf",
+    score: "0xCa19812430a7Fe5F800066D102A22EA6279fD856",
+    attestation: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
+    badge: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
+  },
+  919: {
+    // Mode Sepolia
+    identity: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811",
+    score: "0x02593Bcd818F5403AB78018F068Dea3066BeCF55",
+    attestation: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
+    badge: "0x12B9DDcE9A0C73cec7bF5fCB089712Ce242eaeb1",
+  },
+  999999999: {
+    // Zora Sepolia
+    identity: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811",
+    score: "0x02593Bcd818F5403AB78018F068Dea3066BeCF55",
+    attestation: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
+    badge: "0x12B9DDcE9A0C73cec7bF5fCB089712Ce242eaeb1",
+  },
+  1946: {
+    // Soneium Minato
+    identity: "0x7BaC76EC1a9E5f048dcF115623EB49d0aA826fDf",
+    score: "0xCa19812430a7Fe5F800066D102A22EA6279fD856",
+    attestation: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
+    badge: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
+  },
+  11142220: {
+    // Celo Sepolia
+    identity: "0x27a4381ef8c9184fa82e7d13af96f562bcfe213b",
+    score: "0x12B9DDcE9A0C73cec7bF5fCB089712Ce242eaeb1",
+    attestation: "0x9907bbe59b454aaf0a48b9346e34628081c4c107",
+    badge: "0xf85eec2f56522ee12ec12f53b2bdf9917d68455f",
+  },
 };
 
-export const SURGE_SCORE_ADDRESSES: Record<number, `0x${string}`> = {
-  84532: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
-  11155420: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811",
-  1301: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811",
-  4202: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811",
-  4801: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811",
-  763373: "0xdec42A0f052e84E2121bFe94F18A8fAFFc2E3811",
-  919: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
-  999999999: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
-  1946: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
-  11142220: "0xff56358a8303060d117003ea1d6b0328af4615fa", // Celo Sepolia
-};
-
-export const SURGE_ATTESTATION_ADDRESSES: Record<number, `0x${string}`> = {
-  84532: "0x12B9DDcE9A0C73cec7bF5fCB089712Ce242eaeb1",
-  11155420: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
-  1301: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
-  4202: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
-  4801: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
-  763373: "0xeBEEE0F31Aa48836631F7C9E1fadad595009eBe3",
-  919: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
-  999999999: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
-  1946: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
-  11142220: "0x9907bbe59b454aaf0a48b9346e34628081c4c107", // Celo Sepolia
-};
-
-export const SURGE_BADGE_ADDRESSES: Record<number, `0x${string}`> = {
-  84532: "0x3f694EB36609Cc52f0cBb9Beda3Df1B361A4B457",
-  11155420: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
-  1301: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
-  4202: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
-  4801: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
-  763373: "0x9859bd2D159A565B9385870f27C1CAB3353cB2D8",
-  919: "0x12B9DDcE9A0C73cec7bF5fCB089712Ce242eaeb1",
-  999999999: "0x12B9DDcE9A0C73cec7bF5fCB089712Ce242eaeb1",
-  1946: "0x12B9DDcE9A0C73cec7bF5fCB089712Ce242eaeb1",
-  11142220: "0xf85eec2f56522ee12ec12f53b2bdf9917d68455f", // Celo Sepolia
-};
+// Backwards-compat: derived from CHAIN_REGISTRY, not separate maps
+export const SURGE_IDENTITY_ADDRESSES: Record<number, `0x${string}`> = Object.fromEntries(
+  Object.entries(CHAIN_REGISTRY).map(([k, v]) => [k, v.identity]),
+);
+export const SURGE_SCORE_ADDRESSES: Record<number, `0x${string}`> = Object.fromEntries(
+  Object.entries(CHAIN_REGISTRY).map(([k, v]) => [k, v.score]),
+);
+export const SURGE_ATTESTATION_ADDRESSES: Record<number, `0x${string}`> = Object.fromEntries(
+  Object.entries(CHAIN_REGISTRY).map(([k, v]) => [k, v.attestation]),
+);
+export const SURGE_BADGE_ADDRESSES: Record<number, `0x${string}`> = Object.fromEntries(
+  Object.entries(CHAIN_REGISTRY).map(([k, v]) => [k, v.badge]),
+);
 
 // Default to Base Sepolia for backwards-compat single-address exports
-export const SURGE_IDENTITY_ADDRESS = SURGE_IDENTITY_ADDRESSES[84532];
-export const SURGE_SCORE_ADDRESS = SURGE_SCORE_ADDRESSES[84532];
-export const SURGE_ATTESTATION_ADDRESS = SURGE_ATTESTATION_ADDRESSES[84532];
-export const SURGE_BADGE_ADDRESS = SURGE_BADGE_ADDRESSES[84532];
+export const SURGE_IDENTITY_ADDRESS = CHAIN_REGISTRY[84532].identity;
+export const SURGE_SCORE_ADDRESS = CHAIN_REGISTRY[84532].score;
+export const SURGE_ATTESTATION_ADDRESS = CHAIN_REGISTRY[84532].attestation;
+export const SURGE_BADGE_ADDRESS = CHAIN_REGISTRY[84532].badge;
+
+// ── Contract constants (mirrors SurgeIdentity.sol private constants) ─────────
+// SECURITY_QUORUM is `private constant` in Solidity — no on-chain getter exists.
+// Must be kept in sync manually if the contract is redeployed with a different value.
+// Current value: SurgeIdentity.sol line 41 `uint8 private constant SECURITY_QUORUM = 2`.
+export const SECURITY_QUORUM = 2;
 
 // ── ABIs ──────────────────────────────────────────────────────────────────────
 
@@ -255,6 +304,37 @@ export const surgeIdentityAbi = [
       { name: "identityId", type: "uint256", indexed: true, internalType: "uint256" },
       { name: "newWallet", type: "address", indexed: true, internalType: "address" },
       { name: "promotedToSecurity", type: "bool", indexed: false, internalType: "bool" },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "CompromiseRequested",
+    inputs: [
+      { name: "identityId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "targetWallet", type: "address", indexed: true, internalType: "address" },
+      { name: "requestIndex", type: "uint256", indexed: false, internalType: "uint256" },
+      { name: "requestedAt", type: "uint48", indexed: false, internalType: "uint48" },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "CompromiseCancelled",
+    inputs: [
+      { name: "identityId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "requestIndex", type: "uint256", indexed: false, internalType: "uint256" },
+      { name: "cancelledBy", type: "address", indexed: true, internalType: "address" },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "CompromiseFinalized",
+    inputs: [
+      { name: "identityId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "targetWallet", type: "address", indexed: true, internalType: "address" },
+      { name: "requestIndex", type: "uint256", indexed: false, internalType: "uint256" },
     ],
     anonymous: false,
   },

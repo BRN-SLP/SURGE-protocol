@@ -669,6 +669,8 @@ export function DropsHub() {
           borderBottom: "1px solid var(--border)",
           flexShrink: 0,
           padding: "0 var(--section-px)",
+          overflowX: "auto",
+          scrollbarWidth: "none",
         }}
       >
         {TABS.map((tab) => {
@@ -700,7 +702,7 @@ export function DropsHub() {
               <span
                 style={{
                   fontSize: "0.68rem",
-                  color: isActive && tab.value === "live" ? "var(--accent)" : "#444444",
+                  color: isActive && tab.value === "live" ? "var(--accent)" : "var(--text-faint)",
                 }}
               >
                 {tab.value === "live" ? liveCount : count}
@@ -731,7 +733,7 @@ export function DropsHub() {
               fontSize: "0.75rem",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
-              color: "#444444",
+              color: "var(--text-faint)",
             }}
           >
             No drops in this category

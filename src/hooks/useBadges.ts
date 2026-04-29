@@ -42,7 +42,7 @@ export function useBadges() {
         functionName: "badgeTypes" as const,
         args: [BigInt(i + 1)] as const,
       })),
-    [count],
+    [count, badgeAddress],
   );
 
   const { data: typesRaw } = useReadContracts({
@@ -61,7 +61,7 @@ export function useBadges() {
             args: [address, BigInt(i + 1)] as const,
           }))
         : [],
-    [count, address],
+    [count, address, badgeAddress],
   );
 
   const { data: canClaimRaw, refetch: refetchCanClaim } = useReadContracts({

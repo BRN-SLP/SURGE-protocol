@@ -1,41 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase-server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Simple in-memory rate limit: max 3 signups per IP per hour
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 3;
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
+async function checkRateLimit(ip: string): Promise<boolean> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = getSupabaseAdmin() as any;
+  const now = new Date();
 
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+  const { data } = await db.from("rate_limits").select("count, reset_at").eq("ip", ip).single();
+
+  if (!data || new Date(data.reset_at) <= now) {
+    await db.from("rate_limits").upsert({
+      ip,
+      count: 1,
+      reset_at: new Date(Date.now() + RATE_WINDOW_MS).toISOString(),
+    });
     return true;
   }
 
-  if (entry.count >= RATE_LIMIT) return false;
+  if (data.count >= RATE_LIMIT) return false;
 
-  entry.count++;
+  await db
+    .from("rate_limits")
+    .update({ count: data.count + 1 })
+    .eq("ip", ip);
   return true;
 }
 
 export async function POST(req: NextRequest) {
-  // Rate limiting
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     req.headers.get("x-real-ip") ??
     "unknown";
 
-  if (!checkRateLimit(ip)) {
+  if (!(await checkRateLimit(ip))) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  // Input validation
   let body: { email?: unknown };
   try {
     body = await req.json();
@@ -54,17 +60,17 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     if (error.code === "23505") {
-      // unique violation — already signed up, treat as success
       return NextResponse.json({ ok: true });
     }
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 
-  await resend.emails.send({
-    from: "SURGE Protocol <hello@surge-protocol.xyz>",
-    to: email,
-    subject: "You're on the SURGE early access list",
-    html: `
+  try {
+    await resend.emails.send({
+      from: "SURGE Protocol <hello@surge-protocol.xyz>",
+      to: email,
+      subject: "You're on the SURGE early access list",
+      html: `
       <div style="background:#0a0a0f;color:#f1f5f9;font-family:sans-serif;padding:40px;max-width:560px;margin:0 auto;border-radius:12px;">
         <p style="color:#dc3333;font-weight:700;letter-spacing:0.2em;font-size:12px;text-transform:uppercase;margin:0 0 24px;">SURGE PROTOCOL</p>
         <h1 style="font-size:28px;font-weight:800;margin:0 0 16px;line-height:1.2;">You're in.<br/>Early access confirmed.</h1>
@@ -81,7 +87,10 @@ export async function POST(req: NextRequest) {
         <p style="color:#64748b;font-size:12px;margin:0;">We'll notify you the moment early access opens. No spam. No noise. One email when we launch.</p>
       </div>
     `,
-  });
+    });
+  } catch (err) {
+    console.error("Resend error:", err);
+  }
 
   return NextResponse.json({ ok: true });
 }

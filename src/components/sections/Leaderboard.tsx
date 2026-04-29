@@ -423,8 +423,7 @@ export function Leaderboard() {
                     gap: 8,
                     padding: "13px 12px 13px 16px",
                     borderBottom: "1px solid var(--border)",
-                    borderLeft: isMe ? "3px solid var(--accent)" : "3px solid transparent",
-                    background: isMe ? "var(--surface)" : "transparent",
+                    background: isMe ? "rgba(220,51,51,0.07)" : "transparent",
                     cursor: "pointer",
                     alignItems: "center",
                     transition: "background 0.1s",
@@ -435,7 +434,7 @@ export function Leaderboard() {
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background = isMe
-                      ? "var(--surface)"
+                      ? "rgba(220,51,51,0.07)"
                       : "transparent";
                   }}
                 >

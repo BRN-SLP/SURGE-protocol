@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
+import { gsap, registerGsap } from "@/lib/gsap";
 
 const PROBLEMS = [
   {
@@ -68,6 +68,8 @@ function ProblemCard({ problem, index }: { problem: (typeof PROBLEMS)[number]; i
   return (
     <div
       ref={cardRef}
+      role="article"
+      aria-label={problem.title}
       className="card-item relative p-6"
       data-index={index}
       style={{
@@ -139,7 +141,6 @@ export function ProblemSection() {
 
     return () => {
       ctx.revert();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);
 
