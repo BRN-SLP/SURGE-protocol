@@ -86,7 +86,7 @@ function ProblemCard({ problem, index }: { problem: (typeof PROBLEMS)[number]; i
         {problem.icon}
       </span>
       <h3
-        className="mb-3 text-[16px] font-light tracking-wide uppercase"
+        className="mb-3 text-[0.7rem] font-normal tracking-[0.18em] uppercase"
         style={{ color: "var(--text)" }}
       >
         {problem.title}
@@ -162,7 +162,10 @@ export function ProblemSection() {
           >
             The Problem
           </p>
-          <h2 className="text-[40px] font-light tracking-tight" style={{ color: "var(--text)" }}>
+          <h2
+            className="font-normal tracking-tight"
+            style={{ color: "var(--text)", fontSize: "var(--text-2xl)" }}
+          >
             One Compromise. <span style={{ color: "var(--accent)" }}>Everything</span> Gone.
           </h2>
         </div>

@@ -94,7 +94,10 @@ export function EcosystemSection() {
         >
           Ecosystem
         </p>
-        <h2 className="mb-3 text-[32px] font-light tracking-tight" style={{ color: "var(--text)" }}>
+        <h2
+          className="mb-3 font-normal tracking-tight"
+          style={{ color: "var(--text)", fontSize: "var(--text-xl)" }}
+        >
           Built for the <span style={{ color: "var(--accent)" }}>Superchain</span>
         </h2>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>

@@ -118,7 +118,10 @@ export function HowItWorksSectionV2() {
         >
           The Mechanism
         </p>
-        <h2 className="text-[40px] font-light tracking-tight" style={{ color: "var(--text)" }}>
+        <h2
+          className="font-normal tracking-tight"
+          style={{ color: "var(--text)", fontSize: "var(--text-2xl)" }}
+        >
           How <span style={{ color: "var(--accent)" }}>SURGE</span> Works
         </h2>
         <p className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>

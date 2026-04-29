@@ -249,8 +249,8 @@ export function HeroSection() {
             {/* Headline with T1 word stagger */}
             <h1
               ref={headlineRef}
-              className="font-display leading-[1.08] font-light tracking-tighter"
-              style={{ fontSize: "clamp(2rem, 6vw, 3.25rem)" }}
+              className="font-display leading-[1.05] font-bold tracking-tighter"
+              style={{ fontSize: "var(--text-display)" }}
             >
               {HEADLINE.map((line, li) => (
                 <span key={li} style={{ display: "block" }}>

@@ -62,8 +62,8 @@ export function FinalCTA() {
           </p>
 
           <h2
-            className="font-display text-3xl leading-tight font-light lg:text-4xl"
-            style={{ color: "var(--text)" }}
+            className="font-display leading-tight font-normal"
+            style={{ fontSize: "var(--text-2xl)", color: "var(--text)" }}
           >
             Be first when <span style={{ color: "var(--accent)" }}>SURGE goes live</span>
           </h2>

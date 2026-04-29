@@ -31,17 +31,12 @@ Dark. Precise. Slightly ominous in a good way — the gravity of something that 
 - Glassmorphism / blur-heavy UIs
 - Rainbow gradients on text
 
-## Design Principles (locked)
-
-- Background: `#0e0e0e`, surfaces: `#141414`, `#2a2a2a`
-- Accent: `#dc3333` — rare, used as surprise moment (thin line, hover)
-- Font: Roboto Condensed, `font-weight: 300` everywhere
-- Radius: `var(--radius-sm)` for all cards/containers — never hardcoded px (exceptions: IdentityCard conic-gradient border, pill progress bars)
-- No glassmorphism, no gradient fills, no decorative noise
-- Animations: GSAP, purposeful, subtle
-
 ## Strategic Principles
 
-- Keyboard users matter — this is a protocol for power users who nav by keyboard
-- Reduced motion must be respected — GSAP gates required on all auto-playing animations
-- Dark mode is the primary experience; light mode exists but is secondary
+- **Keyboard users matter** — this is a protocol for power users who nav by keyboard
+- **Reduced motion must be respected** — GSAP gates required on all auto-playing animations
+- **Dark mode is the primary experience** — light mode exists but is secondary
+- **Soulbound aesthetic** — the identity card is the hero artifact, always rendered alive (spinning border, depth tilt); it must never look like a static badge
+- **Scarcity as signal** — accent red appears at most once per section, only as a functional signal (destructive action, hover state), never as decoration
+
+> Visual tokens (colors, radii, type scale) are defined in DESIGN.md; treat them as locked.

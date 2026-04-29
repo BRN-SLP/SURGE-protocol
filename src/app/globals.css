@@ -54,6 +54,19 @@
   --viewport-content: calc(100dvh - var(--navbar-h));
 }
 
+/* ── Type scale ─────────────────────────────────────────── */
+:root {
+  --text-2xs: 0.625rem; /* 10px — micro labels */
+  --text-xs: 0.75rem; /* 12px — eyebrow labels */
+  --text-sm: 0.875rem; /* 14px — secondary, captions */
+  --text-base: 1rem; /* 16px — body minimum */
+  --text-md: 1.125rem; /* 18px — large body */
+  --text-lg: 1.333rem; /* ~21px — card headings */
+  --text-xl: clamp(1.5rem, 2.5vw, 2rem); /* 24–32px — subheadings */
+  --text-2xl: clamp(2rem, 3.5vw, 2.75rem); /* 32–44px — section headings */
+  --text-display: clamp(3rem, 8vw, 5.5rem); /* 48–88px — hero display */
+}
+
 /* ── Base ───────────────────────────────────────────────── */
 html {
   background-color: var(--bg);
@@ -64,6 +77,7 @@ html {
 body {
   font-family: var(--font-roboto-condensed), var(--font-sans), sans-serif;
   min-height: 100vh;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition:
