@@ -1,15 +1,15 @@
 {
   "lastProcessedBlock": {
-    "base": 46547257,
-    "op": 48530131,
+    "base": 46556950,
+    "op": 48539824,
     "lisk": 41458964,
-    "zora": 45391401,
-    "ink": 59859510,
-    "mode": 50497438,
-    "world": 34157693,
-    "soneium": 32834237,
-    "unichain": 62010380,
-    "celo": 35578824
+    "zora": 45401093,
+    "ink": 59878894,
+    "mode": 50507130,
+    "world": 34167384,
+    "soneium": 32843928,
+    "unichain": 62029762,
+    "celo": 35598206
   },
   "knownHolders": {
     "base": [
@@ -32,5 +32,5 @@
     "unichain": [],
     "celo": []
   },
-  "lastRunAt": "2026-09-08T10:20:13.251Z"
+  "lastRunAt": "2026-09-08T15:43:14.777Z"
 }
